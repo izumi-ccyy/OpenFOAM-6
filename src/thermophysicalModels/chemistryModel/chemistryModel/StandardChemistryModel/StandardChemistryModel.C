@@ -392,6 +392,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::calculateRR
     const label si
 ) const
 {
+    //create field of tRR
     tmp<volScalarField::Internal> tRR
     (
         new volScalarField::Internal
@@ -426,15 +427,18 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::calculateRR
         const scalar Ti = T[celli];
         const scalar pi = p[celli];
 
+        //calculate the concentration of species i
         for (label i=0; i<nSpecie_; i++)
         {
             const scalar Yi = Y_[i][celli];
             c_[i] = rhoi*Yi/specieThermo_[i].W();
         }
 
+        //get omega with 10 variables
         const Reaction<ThermoType>& R = reactions_[ri];
         const scalar omegai = R.omega(pi, Ti, c_, pf, cf, lRef, pr, cr, rRef);
 
+        //get left RR
         forAll(R.lhs(), s)
         {
             if (si == R.lhs()[s].index)
@@ -443,6 +447,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::calculateRR
             }
         }
 
+        //get right RR
         forAll(R.rhs(), s)
         {
             if (si == R.rhs()[s].index)
@@ -454,6 +459,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::calculateRR
         RR[celli] *= specieThermo_[si].W();
     }
 
+    //the source term used in species transport equation 
     return tRR;
 }
 

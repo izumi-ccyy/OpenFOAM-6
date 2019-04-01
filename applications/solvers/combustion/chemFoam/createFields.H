@@ -28,6 +28,7 @@
     rhoReactionThermo& thermo = pThermo();
     thermo.validate(args.executable(), "h");
 
+    //rhoReactionThermo is used
     autoPtr<BasicChemistryModel<rhoReactionThermo>> pChemistry
     (
         BasicChemistryModel<rhoReactionThermo>::New(thermo)

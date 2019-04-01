@@ -215,14 +215,14 @@ Foam::scalar Foam::TDACChemistryModel<ReactionThermo, ThermoType>::omega
     label& rRef
 ) const
 {
-    const scalar kf = R.kf(p, T, c);
-    const scalar kr = R.kr(kf, p, T, c);
+    const scalar kf = R.kf(p, T, c);        //kf is the specific reaction rate constant
+    const scalar kr = R.kr(kf, p, T, c);    //kr is the backward reaction rate constant (or kb)
 
-    const label Nl = R.lhs().size();
-    const label Nr = R.rhs().size();
+    const label Nl = R.lhs().size();        //the size or number of species on the left hand of the reaction equation
+    const label Nr = R.rhs().size();        //the size or number of species on the right hand of the reaction equation
 
-    label slRef = 0;
-    lRef = R.lhs()[slRef].index;
+    label slRef = 0;                //slRef is the index of N1, namely a part of all species
+    lRef = R.lhs()[slRef].index;    //lRef is the index of all species
 
     pf = kf;
     for (label s=1; s<Nl; s++)
@@ -242,7 +242,7 @@ Foam::scalar Foam::TDACChemistryModel<ReactionThermo, ThermoType>::omega
             pf *= pow(max(c[si], 0), exp);
         }
     }
-    cf = max(c[lRef], 0);
+    cf = max(c[lRef], 0);       //now cf is the smallest c
 
     {
         const scalar exp = R.lhs()[slRef].exponent;
