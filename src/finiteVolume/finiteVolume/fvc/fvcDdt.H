@@ -25,22 +25,19 @@ InNamespace
     Foam::fvc
 
 Description
-    Calculate the first temporal derivative.
+    Calculate the substantive (total) derivative.
 
 SourceFiles
-    fvcDdt.C
+    fvcDDt.C
 
 \*---------------------------------------------------------------------------*/
 
 
-#ifndef fvcDdt_H
-#define fvcDdt_H
+#ifndef fvcDDt_H
+#define fvcDDt_H
 
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
-#include "dimensionedTypes.H"
-#include "one.H"
-#include "geometricZeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,188 +51,17 @@ namespace Foam
 namespace fvc
 {
     template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
+    tmp<GeometricField<Type, fvPatchField, volMesh>> DDt
     (
-        const dimensioned<Type>,
-        const fvMesh&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
-    (
+        const surfaceScalarField&,
         const GeometricField<Type, fvPatchField, volMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
+    tmp<GeometricField<Type, fvPatchField, volMesh>> DDt
     (
-        const dimensionedScalar&,
+        const tmp<surfaceScalarField>&,
         const GeometricField<Type, fvPatchField, volMesh>&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
-    (
-        const volScalarField&,
-        const GeometricField<Type, fvPatchField, volMesh>&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
-    (
-        const volScalarField&,
-        const volScalarField&,
-        const GeometricField<Type, fvPatchField, volMesh>&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> ddt
-    (
-        const GeometricField<Type, fvsPatchField, surfaceMesh>&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
-    (
-        const one&,
-        const GeometricField<Type, fvPatchField, volMesh>&
-    );
-
-    template<class Type>
-    tmp<GeometricField<Type, fvPatchField, volMesh>> ddt
-    (
-        const GeometricField<Type, fvPatchField, volMesh>&,
-        const one&
-    );
-
-    inline geometricZeroField ddt
-    (
-        const one&,
-        const one&
-    )
-    {
-        return geometricZeroField();
-    }
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
-    );
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >& phi
-    );
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >& phi,
-        const autoPtr<GeometricField<Type, fvsPatchField, surfaceMesh>>& Uf
-    );
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const volScalarField& rho,
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
-    );
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const volScalarField& rho,
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >& phi
-    );
-
-    template<class Type>
-    tmp
-    <
-        GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >
-    >
-    ddtCorr
-    (
-        const volScalarField& rho,
-        const GeometricField<Type, fvPatchField, volMesh>& U,
-        const GeometricField
-        <
-            typename Foam::flux<Type>::type,
-            fvsPatchField,
-            surfaceMesh
-        >& phi,
-        const autoPtr<GeometricField<Type, fvsPatchField, surfaceMesh>>& Uf
     );
 }
 
@@ -247,7 +73,7 @@ namespace fvc
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fvcDdt.C"
+    #include "fvcDDt.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

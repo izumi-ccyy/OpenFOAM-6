@@ -23,61 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicChemistryModel.H"
-#include "fvMesh.H"
-#include "Time.H"
-
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicChemistryModel, 0);
-}
-
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
-void Foam::basicChemistryModel::correct()
-{}
-
+#include "BasicChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicChemistryModel::basicChemistryModel(basicThermo& thermo)
+template<class ReactionThermo>
+Foam::BasicChemistryModel<ReactionThermo>::BasicChemistryModel
+(
+    ReactionThermo& thermo
+)
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            thermo.phasePropertyName("chemistryProperties"),
-            thermo.db().time().constant(),
-            thermo.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-    mesh_(thermo.p().mesh()),
-    chemistry_(lookup("chemistry")),
-    deltaTChemIni_(readScalar(lookup("initialChemicalTimeStep"))),
-    deltaTChemMax_(lookupOrDefault("maxChemicalTimeStep", great)),
-    deltaTChem_
-    (
-        IOobject
-        (
-            thermo.phasePropertyName("deltaTChem"),
-            mesh().time().constant(),
-            mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh(),
-        dimensionedScalar("deltaTChem0", dimTime, deltaTChemIni_)
-    )
+    basicChemistryModel(thermo),
+    thermo_(thermo)
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::autoPtr<Foam::BasicChemistryModel<ReactionThermo>>
+Foam::BasicChemistryModel<ReactionThermo>::New(ReactionThermo& thermo)
+{
+    return basicChemistryModel::New<BasicChemistryModel<ReactionThermo>>
+    (
+        thermo
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::basicChemistryModel::~basicChemistryModel()
+template<class ReactionThermo>
+Foam::BasicChemistryModel<ReactionThermo>::~BasicChemistryModel()
 {}
 
 
