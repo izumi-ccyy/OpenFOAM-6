@@ -87,3 +87,5 @@ doc/Doxygen/DTAGS
 .vscode/ipch/23b3900beae5d113/mmap_address.bin
 .vscode/ipch/af47991eb203d8ea/mmap_address.bin
 *.bin
+.vscode/settings.json
+.vscode/settings.json

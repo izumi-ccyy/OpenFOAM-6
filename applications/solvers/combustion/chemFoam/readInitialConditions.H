@@ -33,13 +33,16 @@
         }
 
         scalar mw = 0.0;
+        //total mole number
         const scalar mTot = sum(X0);
+        //mole fraction of species i
+        //and molecular weight of the mixture
         forAll(Y, i)
         {
             X0[i] /= mTot;
             mw += W[i]*X0[i];
         }
-
+        //mass fraction of species i
         forAll(Y, i)
         {
             Y0[i] = X0[i]*W[i]/mw;
@@ -58,13 +61,14 @@
 
         scalar invW = 0.0;
         const scalar mTot = sum(Y0);
+        //mass fraction of species i
         forAll(Y, i)
         {
             Y0[i] /= mTot;
             invW += Y0[i]/W[i];
         }
         const scalar mw = 1.0/invW;
-
+        //mole fraction of species i
         forAll(Y, i)
         {
             X0[i] = Y0[i]*mw/W[i];
