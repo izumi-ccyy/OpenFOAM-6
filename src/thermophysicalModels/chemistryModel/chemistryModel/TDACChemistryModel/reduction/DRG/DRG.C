@@ -38,7 +38,10 @@ Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::DRG
     searchInitSet_(this->coeffsDict_.subDict("initialSet").size())
 {
     label j=0;
+    //define initial set with dictionary
     dictionary initSet = this->coeffsDict_.subDict("initialSet");
+    //search species i of the intial set in the mechanism
+    //if species i is found, j = j + 1
     for (label i=0; i<chemistry.nSpecie(); i++)
     {
         if (initSet.found(chemistry.Y()[i].member()))
@@ -46,6 +49,8 @@ Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::DRG
             searchInitSet_[j++] = i;
         }
     }
+    //if j < the element number of intial set
+    //species in the initial set is not in the mechanism
     if (j<searchInitSet_.size())
     {
         FatalErrorInFunction
@@ -74,8 +79,10 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     const scalar p
 )
 {
+    //define c1 = number of species + 2
+    //+ 2 means temperature T and pressure p
     scalarField c1(this->nSpecie_+2, 0.0);
-
+    //c for every species, T and p are assigned to c1
     for(label i=0; i<this->nSpecie_; i++)
     {
         c1[i] = c[i];
@@ -85,7 +92,12 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
+    //define the matrix of rABNum as a RectangularMatrix
+    //with nSpecie row and nSpecie column, and the values
+    //are assigned as 0.0
     RectangularMatrix<scalar> rABNum(this->nSpecie_,this->nSpecie_,0.0);
+    //define a scalarField rABDen with length of nSpecie, and 
+    //the values are assigned as 0.0
     scalarField rABDen(this->nSpecie_,0.0);
 
     // Number of initialized rAB for each lines
@@ -99,6 +111,7 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
 
     scalar pf, cf, pr, cr;
     label lRef, rRef;
+    //for all reaction equations
     forAll(this->chemistry_.reactions(), i)
     {
         const Reaction<ThermoType>& R = this->chemistry_.reactions()[i];
@@ -112,29 +125,51 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         // Then for each pair of species composing this reaction,
         // compute the rAB matrix (separate the numerator and
         // denominator)
+        //define a list named wA and a list named wAID
+        //with the length of the number of species in the
+        //left hand of the reaction equation plus the number 
+        //of species in the right hand of the reaction equation
+        //the size of a DynamicList can be extend by the given
+        //increment, which means wA is increased by the number
+        //of the number of the species in the reaction equation
         DynamicList<scalar> wA(R.lhs().size()+R.rhs().size());
         DynamicList<label> wAID(R.lhs().size()+R.rhs().size());
 
+        //for every species in the left hand of the reaction equation
         forAll(R.lhs(), s)
         {
+            //define the index of species s as ss
             label ss = R.lhs()[s].index;
+            //define the stoichiometric coefficient of s as sl
+            //namely, sl = nu'
             scalar sl = -R.lhs()[s].stoichCoeff;
+            //define found as false
             bool found(false);
+            //for every species in the list wA
             forAll(wAID, id)
             {
+                //if species s is in the wA
                 if (ss==wAID[id])
                 {
+                    //wA for species s = wA + sl * omegai
+                    //namely, wA[s] = wA[s] + nu's * omegai
                     wA[id] += sl*omegai;
+                    //set found as true
                     found = true;
                     break;
                 }
             }
+            //if species s is in wA, then it is considered in last if
+            //so next if is avoided. if the species s is not in wA, so
+            //it will be appended to wA in next if
             if (!found)
             {
                 wA.append(sl*omegai);
                 wAID.append(ss);
             }
         }
+        //the same process for the species in the right hand 
+        //of the reaction equation
         forAll(R.rhs(), s)
         {
             label ss = R.rhs()[s].index;
@@ -159,7 +194,9 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         // Now that all nuAi*wi are computed, without counting twice species
         // present in both rhs and lhs, we can update the denominator and
         // numerator for the rAB
+        //DynamicList wAID shrinks to become a compact list
         wAID.shrink();
+        //for every species in wAID
         forAll(wAID, id)
         {
             label curID = wAID[id];
