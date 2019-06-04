@@ -89,3 +89,6 @@ doc/Doxygen/DTAGS
 *.bin
 .vscode/settings.json
 .vscode/settings.json
+src/.vscode/ipch/1f85f90a68402be/DRG.ipch
+src/.vscode/ipch/f4ee552a95f9d034/TDACCHEMISTRYMODEL.ipch
+src/.vscode/settings.json
