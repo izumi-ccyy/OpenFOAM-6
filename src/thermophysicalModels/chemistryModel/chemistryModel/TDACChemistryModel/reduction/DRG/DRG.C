@@ -95,9 +95,11 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     //define the matrix of rABNum as a RectangularMatrix
     //with nSpecie row and nSpecie column, and the values
     //are assigned as 0.0
+    //rABNum means numerator of rAB
     RectangularMatrix<scalar> rABNum(this->nSpecie_,this->nSpecie_,0.0);
     //define a scalarField rABDen with length of nSpecie, and 
     //the values are assigned as 0.0
+    //rABDen means denominator of rAB
     scalarField rABDen(this->nSpecie_,0.0);
 
     // Number of initialized rAB for each lines
@@ -199,19 +201,31 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         //for every species in wAID
         forAll(wAID, id)
         {
+            //curID means index of A
             label curID = wAID[id];
 
             // Absolute value of aggregated value
+            //make all wA positive
+            //a guess: the coefficients of products(speices in the right 
+            //hand of reaction equation) are negative
             scalar curwA = ((wA[id]>=0) ? wA[id] : -wA[id]);
 
+            //define a list deltaBi with length of nSpecie
             List<bool> deltaBi(this->nSpecie_, false);
+            //define a first in first out stack usedIndex
             FIFOStack<label> usedIndex;
+            //for all species in left hand of reaction equation
             forAll(R.lhs(), j)
             {
+                //index of species j is sj
                 label sj = R.lhs()[j].index;
+                //push sj into the stack usedIndex
                 usedIndex.push(sj);
+                //assign deltaBi[sj] as true
                 deltaBi[sj] = true;
             }
+            //for all species in right hand of reaction equation
+            //do the same operation as last for loop
             forAll(R.rhs(), j)
             {
                 label sj = R.rhs()[j].index;
@@ -220,32 +234,52 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
             }
 
             // Disable for self reference (by definition rAA=0)
+            //so rAA do not need to be calculated
             deltaBi[curID] = false;
+            //do while the stack is not empty
             while(!usedIndex.empty())
             {
+                //pop a index from the stack
+                //curIndex means index of B
                 label curIndex = usedIndex.pop();
 
+                //deltaBi is initialized as true
+                //if deltabi is not assigned a value
                 if (deltaBi[curIndex])
                 {
                     // Disable to avoid counting it more than once
+                    //set deltaBi as false in case count it twice or more
                     deltaBi[curIndex] = false;
 
                     // Test if this rAB is not initialized
                     if (rABPos(curID, curIndex)==-1)
                     {
+                        //the initial value of NbrANInit is 0.0
+                        //so rABPos(curID, curIndex) (rABPos[A,B]) changes 
+                        //from -1 to 0.0
+                        //the number of edge of A
+                        //B appears for the first time
                         rABPos(curID, curIndex) = NbrABInit[curID];
+                        //edge number of A add 1
                         NbrABInit[curID]++;
+                        //the edge of numerator of rAB is curwA
                         rABNum(curID, rABPos(curID, curIndex)) = curwA;
+                        //store the index of B in rABOtherSpec
+                        //rABPos(curID, curIndex) means the order of B
+                        //in the set of edge from A
                         rABOtherSpec(curID, rABPos(curID, curIndex)) = curIndex;
                     }
+                    //B does not appear for the first time
                     else
                     {
                         rABNum(curID, rABPos(curID, curIndex)) += curwA;
                     }
                 }
             }
+            //assign the value of denominator of rAB
             if (rABDen[curID] == 0.0)
             {
+                //curwA is positive
                 rABDen[curID] = curwA;
             }
             else
@@ -256,6 +290,7 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     }
     // rii = 0.0 by definition
 
+    //define the number of active species
     label speciesNumber = 0;
 
     // Set all species to inactive and activate them according
@@ -265,29 +300,39 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         this->activeSpecies_[i] = false;
     }
 
+    //define a FIFO stack Q
     FIFOStack<label> Q;
 
     // Initialize the list of active species with the search initiating set
     // (SIS)
     for (label i=0; i<searchInitSet_.size(); i++)
     {
+        //make species in SIS active
         label q = searchInitSet_[i];
         this->activeSpecies_[q] = true;
+        //the number of active species plus 1
         speciesNumber++;
+        //push that species into the stack Q
         Q.push(q);
     }
 
     // Breadth first search with rAB
     while (!Q.empty())
     {
+        //pop a index from Q and assign it to u
         label u = Q.pop();
+        //define Den as the denominator of rAB of index u (or species A)
         scalar Den = rABDen[u];
 
+        //if Den is not too small
         if (Den > vSmall)
         {
+            //NBrABInit is the number of edge from A
             for (label v=0; v<NbrABInit[u]; v++)
             {
+                //get label of B
                 label otherSpec = rABOtherSpec(u, v);
+                //clculate rAB
                 scalar rAB = rABNum(u, v)/Den;
 
                 if (rAB > 1)
@@ -303,25 +348,39 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
                  && !this->activeSpecies_[otherSpec]
                 )
                 {
+                    //add B to the set
+                    //namely push B into the stack Q
+                    //because it is a FIFO stack, so it will start from
+                    //B for the next search
                     Q.push(otherSpec);
+                    //set B as an active species
                     this->activeSpecies_[otherSpec] = true;
+                    //the number of active species plus 1
                     speciesNumber++;
                 }
             }
         }
     }
+    //after the loop of the stack, all the species set is found out
 
     // Put a flag on the reactions containing at least one removed species
     forAll(this->chemistry_.reactions(), i)
     {
+        //for every reaction in the full mechanism
         const Reaction<ThermoType>& R = this->chemistry_.reactions()[i];
+        //first set the reaction equation as active
         this->chemistry_.reactionsDisabled()[i] = false;
 
+        //for every species in the left hand of the reaction equation
         forAll(R.lhs(), s)
         {
+            //define the index of species s as ss
             label ss = R.lhs()[s].index;
 
             // The species is inactive then the reaction is removed
+            //if species s is active, then it will not excute
+            //if species s is inactive, then the reaction equation
+            //is set to inactive and break the for loop
             if (!this->activeSpecies_[ss])
             {
                 // Flag the reaction to disable it
@@ -331,6 +390,9 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         }
 
         // If the reaction has not been disabled yet
+        //if there is no inactive species in the left hand
+        //of the reaction equation, then the species in the
+        //right hand is checked
         if (!this->chemistry_.reactionsDisabled()[i])
         {
             forAll(R.rhs(), s)
@@ -344,30 +406,45 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
             }
         }
     }
+    //after this for loop, all reaction equations containing inactive
+    //species are disabled (set as inactive) 
 
+    //define NsSimp as the number of species for simplified mechanism
+    //and equals to the active species
     this->NsSimp_ = speciesNumber;
+    //define simplified c with length of NsSimp + 2, for temperature 
+    //and pressure
     this->chemistry_.simplifiedC().setSize(this->NsSimp_+2);
     this->chemistry_.simplifiedToCompleteIndex().setSize(this->NsSimp_);
 
     label j = 0;
+    //for every species in the full mechanism 
     for (label i=0; i<this->nSpecie_; i++)
     {
+        //if species i is active
         if (this->activeSpecies_[i])
         {
+            //then assign the index of species i to the index of
+            //the simplifed set
             this->chemistry_.simplifiedToCompleteIndex()[j] = i;
+            //c is also assigned
             this->chemistry_.simplifiedC()[j] = c[i];
+            //move j forward
             this->chemistry_.completeToSimplifiedIndex()[i] = j++;
+            //if species i is not active, then set it to active
             if (!this->chemistry_.active(i))
             {
                 this->chemistry_.setActive(i);
             }
         }
+        //if species i is inaactive, the index set to -1
         else
         {
             this->chemistry_.completeToSimplifiedIndex()[i] = -1;
         }
     }
 
+    //set the last two value of simplifiedc as temperature and pressure
     this->chemistry_.simplifiedC()[this->NsSimp_] = T;
     this->chemistry_.simplifiedC()[this->NsSimp_+1] = p;
     this->chemistry_.setNsDAC(this->NsSimp_);
