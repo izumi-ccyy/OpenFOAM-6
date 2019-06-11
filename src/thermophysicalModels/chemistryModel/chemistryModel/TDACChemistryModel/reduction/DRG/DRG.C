@@ -131,9 +131,11 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         //with the length of the number of species in the
         //left hand of the reaction equation plus the number 
         //of species in the right hand of the reaction equation
-        //the size of a DynamicList can be extend by the given
-        //increment, which means wA is increased by the number
-        //of the number of the species in the reaction equation
+        //the size of a DynamicList is defined by the number of
+        //species in the left hand and in the right hand, so for 
+        //every reaction equations, the size of wA and wAID may
+        //be different, and for every reaction equation, wA and
+        //wAID are empty list 
         DynamicList<scalar> wA(R.lhs().size()+R.rhs().size());
         DynamicList<label> wAID(R.lhs().size()+R.rhs().size());
 
