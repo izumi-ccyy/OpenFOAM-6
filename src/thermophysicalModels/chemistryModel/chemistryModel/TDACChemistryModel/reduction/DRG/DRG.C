@@ -136,7 +136,6 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         //every reaction equations, the size of wA and wAID may
         //be different, and for every reaction equation, wA and
         //wAID are empty list
-        //
         DynamicList<scalar> wA(R.lhs().size()+R.rhs().size());
         DynamicList<label> wAID(R.lhs().size()+R.rhs().size());
 
