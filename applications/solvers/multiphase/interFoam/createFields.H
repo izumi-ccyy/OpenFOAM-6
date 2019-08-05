@@ -1,6 +1,7 @@
 #include "createRDeltaT.H"
 
 Info<< "Reading field p_rgh\n" << endl;
+// define and read p_rgh
 volScalarField p_rgh
 (
     IOobject
@@ -15,6 +16,7 @@ volScalarField p_rgh
 );
 
 Info<< "Reading field U\n" << endl;
+// define and read velocity U
 volVectorField U
 (
     IOobject
@@ -28,20 +30,24 @@ volVectorField U
     mesh
 );
 
+// createPhi, volume flux
 #include "createPhi.H"
 
 
 Info<< "Reading transportProperties\n" << endl;
 immiscibleIncompressibleTwoPhaseMixture mixture(U, phi);
 
+// get alpha1 and alpha2 from transportProperties
 volScalarField& alpha1(mixture.alpha1());
 volScalarField& alpha2(mixture.alpha2());
 
+// get rho1 and rho2 from transportProperties, since it is incompressible
 const dimensionedScalar& rho1 = mixture.rho1();
 const dimensionedScalar& rho2 = mixture.rho2();
 
 
 // Need to store rho for ddt(rho, U)
+// calculate rho with the alpha1 and alpha2
 volScalarField rho
 (
     IOobject
@@ -78,11 +84,13 @@ autoPtr<incompressible::turbulenceModel> turbulence
 );
 
 
+// get gravitation
 #include "readGravitationalAcceleration.H"
 #include "readhRef.H"
 #include "gh.H"
 
 
+// define pressure p
 volScalarField p
 (
     IOobject
