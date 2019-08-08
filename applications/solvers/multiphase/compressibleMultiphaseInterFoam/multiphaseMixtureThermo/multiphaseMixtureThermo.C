@@ -852,14 +852,14 @@ Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseMixtureThermo::nHatfv
     surfaceVectorField gradAlphaf = fvc::interpolate(gradAlpha);
     */
 
-    surfaceVectorField gradAlphaf
+    surfaceVectorField gradAlphaf // gradAlphaf = alpha2 grad alpha1 - alpha1 grad alpha2 = grad alpha1
     (
         fvc::interpolate(alpha2)*fvc::interpolate(fvc::grad(alpha1))
       - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2))
     );
 
     // Face unit interface normal
-    return gradAlphaf/(mag(gradAlphaf) + deltaN_);
+    return gradAlphaf/(mag(gradAlphaf) + deltaN_); // nHatfv = grad alpha / |grad alpha|
 }
 
 
@@ -870,7 +870,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixtureThermo::nHatf
 ) const
 {
     // Face unit interface normal flux
-    return nHatfv(alpha1, alpha2) & mesh_.Sf();
+    return nHatfv(alpha1, alpha2) & mesh_.Sf(); // nHatf = nHatfv * Sf
 }
 
 

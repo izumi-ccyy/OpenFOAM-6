@@ -56,20 +56,20 @@
     scalar cnCoeff = 1.0/(1.0 + ocCoeff);
 
     // Standard face-flux compression coefficient
-    surfaceScalarField phic(mixture.cAlpha()*mag(phi/mesh.magSf()));
+    surfaceScalarField phic(mixture.cAlpha()*mag(phi/mesh.magSf())); // phic = c_alpha |phi / Sf|
 
     // Add the optional isotropic compression contribution
     if (icAlpha > 0)
     {
-        phic *= (1.0 - icAlpha);
-        phic += (mixture.cAlpha()*icAlpha)*fvc::interpolate(mag(U));
+        phic *= (1.0 - icAlpha);  // icAlpha is Isotropic compression coefficient, default value is 0
+        phic += (mixture.cAlpha()*icAlpha)*fvc::interpolate(mag(U)); // mixture.cAlpha is compression coefficient
     }
 
     // Add the optional shear compression contribution
     if (scAlpha > 0)
     {
         phic +=
-            scAlpha*mag(mesh.delta() & fvc::interpolate(symm(fvc::grad(U))));
+            scAlpha*mag(mesh.delta() & fvc::interpolate(symm(fvc::grad(U)))); // scAlpha is Shear compression coefficient
     }
 
 
@@ -93,17 +93,17 @@
     // Calculate the Crank-Nicolson off-centred volumetric flux
     if (ocCoeff > 0)
     {
-        phiCN = cnCoeff*phi + (1.0 - cnCoeff)*phi.oldTime();
+        phiCN = cnCoeff*phi + (1.0 - cnCoeff)*phi.oldTime(); // phiCN = w phi^n + (1 - w) phi^0
     }
 
     if (MULESCorr)
     {
         #include "alphaSuSp.H"
 
-        fvScalarMatrix alpha1Eqn
+        fvScalarMatrix alpha1Eqn // alpha1 equation, without compression
         (
             (
-                LTS
+                LTS // using local Euler scheme or Euler scheme
               ? fv::localEulerDdtScheme<scalar>(mesh).fvmDdt(alpha1)
               : fv::EulerDdtScheme<scalar>(mesh).fvmDdt(alpha1)
             )
@@ -119,7 +119,7 @@
             Su + fvm::Sp(Sp + divU, alpha1)
         );
 
-        alpha1Eqn.solve();
+        alpha1Eqn.solve(); // solve alpha1 equation
 
         Info<< "Phase-1 volume fraction = "
             << alpha1.weightedAverage(mesh.Vsc()).value()
@@ -130,7 +130,10 @@
         tmp<surfaceScalarField> talphaPhi1UD(alpha1Eqn.flux());
         alphaPhi10 = talphaPhi1UD();
 
-        if (alphaApplyPrevCorr && talphaPhi1Corr0.valid())
+        // Apply the compression correction from the previous iteration
+        // Improves efficiency for steady-simulations but can only be applied
+        // once the alpha field is reasonably steady, i.e. fully developed
+        if (alphaApplyPrevCorr && talphaPhi1Corr0.valid()) // if use previous alphaPhi
         {
             Info<< "Applying the previous iteration compression flux" << endl;
             MULES::correct
@@ -155,6 +158,7 @@
     }
 
 
+    // add compression
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
         #include "alphaSuSp.H"
