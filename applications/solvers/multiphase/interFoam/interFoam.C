@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            // first update the dynamic mesh
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
                 mesh.update();
@@ -134,11 +135,15 @@ int main(int argc, char *argv[])
                 }
             }
 
+            // after dynamic mesh was updated, start calculation
+            // first, calculate alpha
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
 
+            // second, correct mixture
             mixture.correct();
 
+            // solve momentum equation and predict velocity
             #include "UEqn.H"
 
             // --- Pressure corrector loop
@@ -147,6 +152,7 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
+            // correct turbulence model
             if (pimple.turbCorr())
             {
                 turbulence->correct();
