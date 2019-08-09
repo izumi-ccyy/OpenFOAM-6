@@ -32,10 +32,12 @@ volVectorField U
 
 immiscibleIncompressibleThreePhaseMixture mixture(U, phi);
 
+// three alpha
 volScalarField& alpha1(mixture.alpha1());
 volScalarField& alpha2(mixture.alpha2());
 volScalarField& alpha3(mixture.alpha3());
 
+// three rho
 const dimensionedScalar& rho1 = mixture.rho1();
 const dimensionedScalar& rho2 = mixture.rho2();
 const dimensionedScalar& rho3 = mixture.rho3();

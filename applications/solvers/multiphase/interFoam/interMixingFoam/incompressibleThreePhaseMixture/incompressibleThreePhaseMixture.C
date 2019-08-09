@@ -43,7 +43,7 @@ void Foam::incompressibleThreePhaseMixture::calcNu()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::incompressibleThreePhaseMixture::incompressibleThreePhaseMixture
+Foam::incompressibleThreePhaseMixture::incompressibleThreePhaseMixture // read related variables
 (
     const volVectorField& U,
     const surfaceScalarField& phi
@@ -163,7 +163,7 @@ Foam::incompressibleThreePhaseMixture::incompressibleThreePhaseMixture
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::incompressibleThreePhaseMixture::mu() const
+Foam::incompressibleThreePhaseMixture::mu() const // calculate mu = alpha1 rho1 nu1 + alpha2 rho2 nu2 + alpha3 rho3 nu3
 {
     return tmp<volScalarField>
     (
@@ -179,7 +179,7 @@ Foam::incompressibleThreePhaseMixture::mu() const
 
 
 Foam::tmp<Foam::surfaceScalarField>
-Foam::incompressibleThreePhaseMixture::muf() const
+Foam::incompressibleThreePhaseMixture::muf() const // muf is mu at surface
 {
     surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
     surfaceScalarField alpha2f(fvc::interpolate(alpha2_));
@@ -199,7 +199,7 @@ Foam::incompressibleThreePhaseMixture::muf() const
 
 
 Foam::tmp<Foam::surfaceScalarField>
-Foam::incompressibleThreePhaseMixture::nuf() const
+Foam::incompressibleThreePhaseMixture::nuf() const // nuf is nu at surface
 {
     surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
     surfaceScalarField alpha2f(fvc::interpolate(alpha2_));

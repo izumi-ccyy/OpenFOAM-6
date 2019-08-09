@@ -2,7 +2,7 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
-    surfaceScalarField phir
+    surfaceScalarField phir // phir = c_alpha * phi / Sf * nHatf
     (
         IOobject
         (
@@ -40,7 +40,7 @@
 
 
         // Create the complete convection flux for alpha1
-        surfaceScalarField alphaPhi1
+        surfaceScalarField alphaPhi1 // add compression
         (
             fvc::flux
             (
@@ -48,13 +48,13 @@
                 alpha1,
                 alphaScheme
             )
-          + fvc::flux
+          + fvc::flux // compression for alpha2
             (
                 -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
             )
-          + fvc::flux
+          + fvc::flux // compression for alpha3
             (
                 -fvc::flux(-phir, alpha3, alpharScheme),
                 alpha1,
@@ -109,7 +109,7 @@
         }
 
         // Create the complete flux for alpha2
-        surfaceScalarField alphaPhi2
+        surfaceScalarField alphaPhi2 // interface only exsists between 1 and 2, 1 and 3
         (
             fvc::flux
             (
@@ -117,7 +117,7 @@
                 alpha2,
                 alphaScheme
             )
-          + fvc::flux
+          + fvc::flux // add compression between 1 and 2
             (
                 -fvc::flux(phir, alpha1, alpharScheme),
                 alpha2,
@@ -195,7 +195,7 @@
         alpha2Eqn.solve();
 
         // Construct the complete mass flux
-        rhoPhi =
+        rhoPhi = // alphaPhi1 rho1 + alphaPhi2 rho2 + alphaPhi3 rho3
               alphaPhi1*(rho1 - rho3)
             + (alphaPhi2 + alpha2Eqn.flux())*(rho2 - rho3)
             + phi*rho3;
