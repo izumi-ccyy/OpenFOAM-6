@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    interMixingFoam
+    interMixingEvapFoam
 
 Description
     Solver for 3 incompressible fluids, two of which are miscible, using a VOF
