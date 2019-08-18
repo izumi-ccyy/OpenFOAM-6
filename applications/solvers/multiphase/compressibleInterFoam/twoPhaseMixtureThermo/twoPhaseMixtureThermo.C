@@ -51,7 +51,7 @@ Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
     thermo2_(nullptr)
 {
     {
-        volScalarField T1
+        volScalarField T1 // temperature for phase 1
         (
             IOobject
             (
@@ -66,7 +66,7 @@ Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
     }
 
     {
-        volScalarField T2
+        volScalarField T2 // temperature for phase 2
         (
             IOobject
             (
@@ -102,7 +102,7 @@ Foam::twoPhaseMixtureThermo::~twoPhaseMixtureThermo()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::twoPhaseMixtureThermo::correctThermo()
+void Foam::twoPhaseMixtureThermo::correctThermo() // correct thermo
 {
     thermo1_->T() = T_;
     thermo1_->he() = thermo1_->he(p_, T_);
@@ -114,7 +114,7 @@ void Foam::twoPhaseMixtureThermo::correctThermo()
 }
 
 
-void Foam::twoPhaseMixtureThermo::correct()
+void Foam::twoPhaseMixtureThermo::correct() // correct parameters
 {
     psi_ = alpha1()*thermo1_->psi() + alpha2()*thermo2_->psi();
     mu_ = alpha1()*thermo1_->mu() + alpha2()*thermo2_->mu();
@@ -142,6 +142,7 @@ bool Foam::twoPhaseMixtureThermo::isochoric() const
 }
 
 
+// calculate he with alpha
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::he
 (
     const volScalarField& p,

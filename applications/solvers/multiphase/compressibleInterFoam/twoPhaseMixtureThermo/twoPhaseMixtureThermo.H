@@ -50,14 +50,14 @@ namespace Foam
                          Class twoPhaseMixtureThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-class twoPhaseMixtureThermo
+class twoPhaseMixtureThermo // define a new class
 :
-    public psiThermo,
-    public twoPhaseMixture,
-    public interfaceProperties
+    public psiThermo, // use psiThermo, this is for compressible, for incompressible, it might be rhoThermo
+    public twoPhaseMixture, // Mixture model
+    public interfaceProperties // interface model
 {
     // Private data
-
+        // define two thermos for two phases
         //- Thermo-package of phase 1
         autoPtr<rhoThermo> thermo1_;
 

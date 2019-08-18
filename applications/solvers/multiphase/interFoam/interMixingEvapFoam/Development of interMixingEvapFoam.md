@@ -151,3 +151,29 @@ $$
 $$
 \frac{\partial \alpha_v}{\partial t} = \nabla \cdot (\mathbf {U} \alpha_v) = \frac{\dot m '''}{\rho_v}
 $$
+
+# compressibleInterFoam
+
+## Structure
+
++ compressibleInterDyMFoam
++ compressibleInterFilmFoam
++ Make
++ surfaceTensionModels
++ twoPhaseMixtureThermo
++ VoFphaseCompressibleTurbulenceModels
++ Allwclean
++ Allwmake
++ alphaSuSp.H
++ compressibleAlphaEqnSubCycle..H
++ compressibleInterFoam.C
++ createFields.H
++ pEqn.H
++ rhofs.H
++ TEqn.H
++ UEqn.H
+
+## twoPhaseMixtureThermo
+
+### twoPhaseMixtureThermo.H
+
