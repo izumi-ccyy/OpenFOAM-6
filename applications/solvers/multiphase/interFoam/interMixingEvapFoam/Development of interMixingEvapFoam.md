@@ -3,6 +3,8 @@
 + copy and rename `interMixingFoam` as `interMixingEvapFoam`
 + rename `interMixingFoam.C` as `interMixingEvapFoam.C`
 + modify Make folder, modify `files`
++ copy `UEqn.H` and `pEqn.H` from interFoam to here, since `pEqn.H` should be modified later
+
 
 ## interMixingEvapFoam.C
 
