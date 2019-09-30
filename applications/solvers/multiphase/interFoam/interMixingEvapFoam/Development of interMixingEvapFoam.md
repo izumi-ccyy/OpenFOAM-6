@@ -14,6 +14,94 @@
 + moditf files in `thermoIncompressibleThreePhaseMixture`
 + modify files in `threePhaseMixtureEThermo`
 
+## thermoIncompressibleThreePhaseMixture
+
++ change from 'incompressibleTwoPhaseMixture.H' to `immiscibleIncompressibleThreePhaseMixture.H`
++ replace 'incompressibleTwoPhaseMixture' with `immiscibleIncompressibleThreePhaseMixture`
+
+### thermoIncompressibleThreePhaseMixture.H
+
++ add variables and member functions for phase 3
+
+```cpp
+dimensionedScalar kappa3_;
+dimensionedScalar Cp3_;
+dimensionedScalar Cv3_;
+dimensionedScalar Hf3_;
+```
+
+```cpp
+//- Return const-access to phase3 kappa
+const dimensionedScalar& kappa3() const
+{
+    return kappa3_;
+};
+
+//- Return const-access to phase3 Cp
+const dimensionedScalar& Cp3() const
+{
+    return Cp3_;
+};
+
+//- Return const-access to phase3 Cv
+const dimensionedScalar& Cv3() const
+{
+    return Cv3_;
+};
+
+//- Return latent heat for phase 3
+const dimensionedScalar& Hf3() const
+{
+    return Hf3_;
+};
+```
+
+### thermoIncompressibleThreePhaseMixture.C
+
+In the defination of mixture
+
+```cpp
+kappa3_
+(
+    "kappa3",
+    kappa1_.dimensions(),
+    subDict(phase3Name_),
+    "kappa"
+),
+
+Cp3_
+(
+    "Cp3",
+    dimEnergy/dimTemperature/dimMass,
+    subDict(phase3Name_),
+    "Cp"
+),
+
+Cv3_
+(
+    "Cv3",
+    dimEnergy/dimTemperature/dimMass,
+    subDict(phase3Name_),
+    "Cv"
+),
+
+Hf3_
+(
+    "Hf3",
+    dimEnergy/dimMass,
+    subDict(phase3Name_),
+    "hf"
+)
+```
+
+In the defination of member function
+
+```cpp
+subDict(phase2Name_).readEntry("kappa", kappa3_);
+subDict(phase2Name_).readEntry("Cp", Cp3_);
+subDict(phase2Name_).readEntry("Cv", Cv3_);
+subDict(phase2Name_).readEntry("hf", Hf3_);
+```
 
 ## interMixingEvapFoam.C
 

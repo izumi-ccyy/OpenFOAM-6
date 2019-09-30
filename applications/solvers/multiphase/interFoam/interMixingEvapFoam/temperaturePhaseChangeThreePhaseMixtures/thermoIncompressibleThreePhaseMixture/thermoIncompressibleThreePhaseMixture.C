@@ -42,8 +42,9 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
     const surfaceScalarField& phi
 )
 :
-    incompressibleTwoPhaseMixture(U, phi),
+    immiscibleIncompressibleThreePhaseMixture(U, phi),
 
+    // add variables for phase 3
     kappa1_
     (
         "kappa1",
@@ -51,11 +52,20 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
         subDict(phase1Name_),
         "kappa"
     ),
+
     kappa2_
     (
         "kappa2",
         kappa1_.dimensions(),
         subDict(phase2Name_),
+        "kappa"
+    ),
+
+    kappa3_
+    (
+        "kappa3",
+        kappa1_.dimensions(),
+        subDict(phase3Name_),
         "kappa"
     ),
 
@@ -66,11 +76,20 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
         subDict(phase1Name_),
         "Cp"
     ),
+
     Cp2_
     (
         "Cp2",
         dimEnergy/dimTemperature/dimMass,
         subDict(phase2Name_),
+        "Cp"
+    ),
+
+    Cp3_
+    (
+        "Cp3",
+        dimEnergy/dimTemperature/dimMass,
+        subDict(phase3Name_),
         "Cp"
     ),
 
@@ -90,6 +109,14 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
         "Cv"
     ),
 
+    Cv3_
+    (
+        "Cv3",
+        dimEnergy/dimTemperature/dimMass,
+        subDict(phase3Name_),
+        "Cv"
+    ),
+
     Hf1_
     (
         "Hf1",
@@ -105,6 +132,14 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
         subDict(phase2Name_),
         "hf"
     )
+
+    Hf3_
+    (
+        "Hf3",
+        dimEnergy/dimMass,
+        subDict(phase3Name_),
+        "hf"
+    )
 {
 
 }
@@ -114,19 +149,24 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
 
 bool Foam::thermoIncompressibleThreePhaseMixture::read()
 {
-    if (incompressibleTwoPhaseMixture::read())
+    if (immiscibleIncompressibleThreePhaseMixture::read())
     {
+        // add functions for phase 3
         subDict(phase1Name_).readEntry("kappa", kappa1_);
         subDict(phase2Name_).readEntry("kappa", kappa2_);
+        subDict(phase2Name_).readEntry("kappa", kappa3_);
 
         subDict(phase1Name_).readEntry("Cp", Cp1_);
         subDict(phase2Name_).readEntry("Cp", Cp2_);
+        subDict(phase2Name_).readEntry("Cp", Cp3_);
 
         subDict(phase1Name_).readEntry("Cv", Cv1_);
         subDict(phase2Name_).readEntry("Cv", Cv2_);
+        subDict(phase2Name_).readEntry("Cv", Cv3_);
 
         subDict(phase1Name_).readEntry("hf", Hf1_);
         subDict(phase2Name_).readEntry("hf", Hf2_);
+        subDict(phase2Name_).readEntry("hf", Hf3_);
 
         return true;
     }

@@ -35,7 +35,9 @@ SourceFiles
 #ifndef thermoIncompressibleThreePhaseMixture_H
 #define thermoIncompressibleThreePhaseMixture_H
 
-#include "incompressibleTwoPhaseMixture.H"
+// use immiscibleIncompressibleThreePhaseMixture.H
+//#include "incompressibleTwoPhaseMixture.H"
+#include "immiscibleIncompressibleThreePhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +50,7 @@ namespace Foam
 
 class thermoIncompressibleThreePhaseMixture
 :
-    public incompressibleTwoPhaseMixture
+    public immiscibleIncompressibleThreePhaseMixture
 {
 protected:
 
@@ -56,17 +58,22 @@ protected:
 
 
         //- Thermal variables
+        //- add Thermal variables for phase 3
         dimensionedScalar kappa1_;
         dimensionedScalar kappa2_;
+        dimensionedScalar kappa3_;
 
         dimensionedScalar Cp1_;
         dimensionedScalar Cp2_;
+        dimensionedScalar Cp3_;
 
         dimensionedScalar Cv1_;
         dimensionedScalar Cv2_;
+        dimensionedScalar Cv3_;
 
         dimensionedScalar Hf1_;
         dimensionedScalar Hf2_;
+        dimensionedScalar Hf3_;
 
 
 public:
@@ -90,6 +97,13 @@ public:
 
 
     // Access function
+    // add function for phase 3
+
+        //- Return const-access to phase1 kappa
+        const dimensionedScalar& kappa1() const
+        {
+            return kappa1_;
+        };
 
         //- Return const-access to phase2 kappa
         const dimensionedScalar& kappa2() const
@@ -97,10 +111,10 @@ public:
             return kappa2_;
         };
 
-        //- Return const-access to phase1 kappa
-        const dimensionedScalar& kappa1() const
+        //- Return const-access to phase3 kappa
+        const dimensionedScalar& kappa3() const
         {
-            return kappa1_;
+            return kappa3_;
         };
 
         //- Return const-access to phase1 Cp
@@ -109,10 +123,16 @@ public:
             return Cp1_;
         };
 
-        //- Return const-access to phase1 Cp
+        //- Return const-access to phase2 Cp
         const dimensionedScalar& Cp2() const
         {
             return Cp2_;
+        };
+
+        //- Return const-access to phase3 Cp
+        const dimensionedScalar& Cp3() const
+        {
+            return Cp3_;
         };
 
         //- Return const-access to phase1 Cv
@@ -121,10 +141,16 @@ public:
             return Cv1_;
         };
 
-        //- Return const-access to phase1 Cv
+        //- Return const-access to phase2 Cv
         const dimensionedScalar& Cv2() const
         {
             return Cv2_;
+        };
+
+        //- Return const-access to phase3 Cv
+        const dimensionedScalar& Cv3() const
+        {
+            return Cv3_;
         };
 
         //- Return latent heat for phase 1
@@ -137,6 +163,12 @@ public:
         const dimensionedScalar& Hf2() const
         {
             return Hf2_;
+        };
+
+        //- Return latent heat for phase 3
+        const dimensionedScalar& Hf3() const
+        {
+            return Hf3_;
         };
 
         //- Read base transportProperties dictionary
