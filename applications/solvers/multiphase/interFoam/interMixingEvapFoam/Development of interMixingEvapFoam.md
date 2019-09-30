@@ -103,6 +103,527 @@ subDict(phase2Name_).readEntry("Cv", Cv3_);
 subDict(phase2Name_).readEntry("hf", Hf3_);
 ```
 
+## threePhaseMixtureEThermo
+
+### threePhaseMixtureEThermo.H
+
+There is only declaration, so do not have to change.
+
+### threePhaseMixtureEThermo.C
+
+#### init()
+
+$$
+e_1 = C_{v1} ( T - T_{sat}) + H_{f1}
+$$
+
+$$
+e_2 = C_{v2} ( T - T_{sat}) + H_{f2}
+$$
+
+$$
+e_3 = C_{v3} ( T - T_{sat}) + H_{f3}
+$$
+
+$$
+e = \frac{\alpha_1 \rho_1 e_1 + \alpha_2 \rho_2 e_2 + \alpha_3 \rho_3 e_3}{\alpha_1 \rho_1 + \alpha_2 \rho_2 + \alpha_3 \rho_3}
+$$
+
+$$
+e = \frac{(\alpha_1 \rho_1 C_{v1} + \alpha_2 \rho_2 C_{v2} + \alpha_3 \rho_3 C_{v3})(T-T_{sat}) + (\alpha_1 \rho_1 H_{f1} + \alpha_2 \rho_2 H_{f2} + \alpha_3 \rho_3 H_{f3})}{\alpha_1 \rho_1 + \alpha_2 \rho_2 + \alpha_3 \rho_3}
+$$
+
+```cpp
+void Foam::threePhaseMixtureEThermo::init()
+{
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    e_ =
+        (
+            (T_ - TSat_)*(alpha1Rho1*Cv1() + alpha2Rho2*Cv2() + alpha3Rho3*Cv3())
+          + (alpha1Rho1*Hf1() + alpha2Rho2*Hf2() + alpha3Rho3*Hf3())
+        )
+       /(alpha1Rho1 + alpha2Rho2 + alpha3Rho3);
+
+    e_.correctBoundaryConditions();
+}
+```
+
+#### correct()
+
+$$
+T = \frac{e (\alpha_1 \rho_1 + \alpha_2 \rho_2 + \alpha_3 \rho_3) - (\alpha_1 \rho_1 H_{f1} + \alpha_2 \rho_2 H_{f2} + \alpha_3 \rho_3 H_{f3})}{\alpha_1 \rho_1 C_{v1} + \alpha_2 \rho_2 C_{v2} + \alpha_3 \rho_3 C_{v3}} + T_{sat}
+$$
+
+```cpp
+void Foam::threePhaseMixtureEThermo::correct() // correct T by alpha1 and alpha2
+{
+    incompressibleTwoPhaseMixture::correct();
+
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    T_ =
+        (
+            (e_*(alpha1Rho1 + alpha2Rho2 + alpha3Rho3))
+         -  (alpha1Rho1*Hf1() + alpha2Rho2*Hf2() + alpha3Rho3*Hf3())
+        )
+       /(alpha1Rho1*Cv1() + alpha2Rho2*Cv2() + alpha3Rho3*Cv3())
+       + TSat_;
+
+    T().correctBoundaryConditions();
+}
+```
+
+#### he(p, T)
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::he
+(
+    const volScalarField& p,
+    const volScalarField& T
+) const
+{
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    return
+    (
+        (T - TSat_)*(alpha1Rho1*Cv1() + alpha2Rho2*Cv2() + alpha3Rho3*Cv3())
+        + (alpha1Rho1*Hf1() + alpha2Rho2*Hf2( + alpha3Rho3*Hf3()))
+    )
+    / (alpha1Rho1 + alpha2Rho2 + alpha3Rho3);
+}
+```
+
+#### h(p, T, celli)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::he
+(
+    const scalarField& p,
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    tmp<scalarField> the(new scalarField(T.size()));
+    scalarField& he = the.ref();
+
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    forAll(T, i)
+    {
+        const label celli = cells[i];
+        he[i] =
+            (
+                (T[i] - TSat_.value())
+               *(
+                   alpha1Rho1[celli]*Cv1().value()
+                 + alpha2Rho2[celli]*Cv2().value()
+                 + alpha3Rho3[celli]*Cv3().value()
+                )
+              + (
+                    alpha1Rho1[celli]*Hf1().value()
+                  + alpha2Rho2[celli]*Hf2().value()
+                  + alpha3Rho3[celli]*Hf3().value()
+                )
+            )
+            / (alpha1Rho1[celli] + alpha2Rho2[celli] + alpha3Rho3[celli]);
+    }
+
+    return the;
+}
+```
+
+#### h(p, T, patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::he
+(
+    const scalarField& p,
+    const scalarField& T,
+    const label patchi
+) const
+{
+    // add phase 3
+    const scalarField& alpha1p = alpha1().boundaryField()[patchi];
+    const scalarField& alpha2p = alpha2().boundaryField()[patchi];
+    const scalarField& alpha3p = alpha3().boundaryField()[patchi];
+
+    const scalarField& Tp = T_.boundaryField()[patchi];
+
+    return
+    (
+        (
+            (Tp - TSat_.value())
+           *(
+               alpha1p*rho1().value()*Cv1().value()
+             + alpha2p*rho2().value()*Cv2().value()
+             + alpha3p*rho3().value()*Cv3().value()
+            )
+          + (
+               alpha1p*rho1().value()*Hf1().value()
+             + alpha2p*rho2().value()*Hf2().value()
+             + alpha3p*rho3().value()*Hf3().value()
+            )
+        )
+        / (alpha1p*rho1().value() + alpha2p*rho2().value() + alpha3p*rho3().value())
+    );
+}
+```
+
+#### Cp()
+
+mass average:
+
+$$
+C_p = \frac{\alpha_1 \rho_1 C_{p1} + \alpha_2 \rho_2 C_{p2} + \alpha_3 \rho_3 C_{p3}}{\alpha_1 \rho_1 + \alpha_2 \rho_2 + \alpha_3 \rho_3}
+$$
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::Cp() const
+{
+    // use mass average
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            "cp",
+            (
+                (alpha1Rho1*Cp1() + alpha2Rho2*Cp2() + alpha3Rho3*Cp3()) 
+                / (alpha1Rho1 + alpha2Rho2 + alpha3Rho3)
+            )
+        )
+    );
+}
+```
+
+#### Cp(p, T, patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::Cp
+(
+    const scalarField& p,
+    const scalarField& T,
+    const label patchi
+) const
+{
+    // use mass average
+    // add phase 3    
+    const scalarField& alpha1p = alpha1().boundaryField()[patchi];
+    const scalarField& alpha2p = alpha2().boundaryField()[patchi];
+    const scalarField& alpha3p = alpha3().boundaryField()[patchi];
+
+    return
+    (
+        (
+            alpha1p*rho1().value()*Cp1().value()
+          + alpha2p*rho2().value()*Cp2().value()
+          + alpha3p*rho3().value()*Cp3().value()
+        )
+        /  (alpha1p*rho1().value() + alpha2p*rho2().value() + alpha3p*rho3().value())
+    );
+}
+```
+
+#### rho()
+
+add limitation to $alpha_2$ as:
+
+$$
+0 \leqslant \alpha_2 \leqslant 1 - \alpha_1
+$$
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::rho() const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            "rho",
+            (
+                limitedAlpha1*rho1().value()
+                limitedAlpha2*rho2().value()
+              + (scalar(1) - limitedAlpha1 - limitedAlpha3)*rho3().value()
+            )
+        )
+    );
+}
+```
+
+#### rho(patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::rho
+(
+    const label patchi
+) const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
+    const scalarField& alpha2p = limitedAlpha2.boundaryField()[patchi];
+
+    return
+    (
+        alpha1p*rho1().value() + alpha2p*rho2().value()
+      + (scalar(1) - alpha1p - alpha2p)*rho3().value()
+    );
+}
+```
+
+#### Cv()
+
+mass average like Cp()
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::Cv() const
+{
+    // use mass average
+    // add phase 3
+    const volScalarField alpha1Rho1(alpha1()*rho1());
+    const volScalarField alpha2Rho2(alpha2()*rho2());
+    const volScalarField alpha3Rho3(alpha3()*rho3());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            "cv",
+            (
+                (alpha1Rho1*Cv1() + alpha2Rho2*Cv2() + alpha3Rho3*Cv3()) 
+                / (alpha1Rho1 + alpha2Rho2 + alpha3Rho3)
+            )
+        )
+    );
+}
+```
+
+#### Cv(p, T, patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::Cv
+(
+    const scalarField& p,
+    const scalarField& T,
+    const label patchi
+) const
+{
+    // use mass average
+    // add phase 3    
+    const scalarField& alpha1p = alpha1().boundaryField()[patchi];
+    const scalarField& alpha2p = alpha2().boundaryField()[patchi];
+    const scalarField& alpha3p = alpha3().boundaryField()[patchi];
+
+    return
+    (
+        (
+            alpha1p*rho1().value()*Cv1().value()
+          + alpha2p*rho2().value()*Cv2().value()
+          + alpha3p*rho3().value()*Cv3().value()
+        )
+        /  (alpha1p*rho1().value() + alpha2p*rho2().value() + alpha3p*rho3().value())
+    );
+}
+```
+
+#### gamma()
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::gamma() const
+{
+    // add phase 3
+    return tmp<volScalarField>
+    (
+        (alpha1_*Cp1() + alpha2_*Cp2() + alpha3_*Cp3())
+      / (alpha1_*Cv1() + alpha2_*Cv2() + alpha3_*Cv3())
+    );
+}
+```
+
+#### kappa()
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::kappa() const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            "kappa",
+            (
+                limitedAlpha1*kappa1() + limitedAlpha2*kappa2() 
+              + (scalar(1) - limitedAlpha1  - limitedAlpha2)*kappa3()
+            )
+        )
+    );
+}
+```
+
+#### kappa(patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::kappa
+(
+    const label patchi
+) const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
+    const scalarField& alpha2p = limitedAlpha2.boundaryField()[patchi];
+
+    return 
+    (
+        alpha1p*kappa1().value() + alpha2p*kappa2().value() 
+      + (1 - alpha1p - alpha2p)*kappa3().value()
+    );
+}
+```
+
+### kappaEff(kappat, patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::kappaEff
+(
+    const scalarField& kappat,
+    const label patchi
+) const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
+    const scalarField& alpha2p = limitedAlpha2.boundaryField()[patchi];
+
+    return
+    (    
+        (alpha1p*kappa1().value() + alpha2p*kappa2().value() 
+      + (1 - alpha1p - alpha2p)*kappa3().value()) + kappat
+    );
+
+}
+```
+
+#### alphaEff(alphat)
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::alphaEff
+(
+    const volScalarField& alphat
+) const
+{
+    // add phase 3
+    const volScalarField rho
+    (
+        alpha1_*rho1() + alpha2_*rho2() + (1.0 - alpha1_ - alpha2_)*rho3()
+    );
+
+    return (kappa()/Cp()/rho + alphat);
+}
+```
+
+#### alphaEff(alphat, patchi)
+
+```cpp
+Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::alphaEff
+(
+    const scalarField& alphat,
+    const label patchi
+) const
+{
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
+    // add limitation to alpha2
+    const volScalarField limitedAlpha2
+    (
+        min(max(alpha2_, scalar(0)), scalar(1) - limitedAlpha1)
+    );
+
+    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
+    const scalarField& alpha2p = limitedAlpha2.boundaryField()[patchi];
+
+    const scalarField rho
+    (
+        alpha1p*rho1().value() + alpha2p*rho2().value() + (1.0 - alpha1p - alpha2p)*rho3().value()
+    );
+
+    const scalarField kappa
+    (
+        alpha1p*kappa1().value() + alpha2p*kappa2().value() + (1.0 - alpha1p - alpha2p)*kappa3().value()
+    );
+
+    const scalarField Cp
+    (
+        alpha1p*Cp1().value() + alpha2p*Cp2().value() + (1.0 - alpha1p - alpha2p)*Cp3().value()
+    );
+
+    return kappa/Cp/rho + alphat;
+}
+```
+
+
 ## interMixingEvapFoam.C
 
 + replace all `interMixingFoam` with `interMixingEvapFoam`
