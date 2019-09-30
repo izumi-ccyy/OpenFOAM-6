@@ -4,6 +4,11 @@
 + rename `interMixingFoam.C` as `interMixingEvapFoam.C`
 + modify Make folder, modify `files`
 + copy `UEqn.H` and `pEqn.H` from interFoam to here, since `pEqn.H` should be modified later
++ copy `temperaturePhaseChangeTwoPhaseMixtures` folder and `Allwmake` and `Allwclean` from `interCondensationEvaporationFoam` of `OpenFOAM-PLUS`
+
+## temperaturePhaseChangeTwoPhaseMixtures
+
++ rename `temperaturePhaseChangeTwoPhaseMixtures` as `temperaturePhaseChangeThreePhaseMixtures`
 
 
 ## interMixingEvapFoam.C
