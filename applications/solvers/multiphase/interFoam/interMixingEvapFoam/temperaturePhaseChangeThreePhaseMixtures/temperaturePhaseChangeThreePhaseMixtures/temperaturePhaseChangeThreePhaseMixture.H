@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::temperaturePhaseChangeTwoPhaseMixture
+    Foam::temperaturePhaseChangeThreePhaseMixture
 
 Description
 
 SourceFiles
-    temperaturePhaseChangeTwoPhaseMixture.C
-    newtemperaturePhaseChangeTwoPhaseMixture.C
+    temperaturePhaseChangeThreePhaseMixture.C
+    newtemperaturePhaseChangeThreePhaseMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperaturePhaseChangeTwoPhaseMixture_H
-#define temperaturePhaseChangeTwoPhaseMixture_H
+#ifndef temperaturePhaseChangeThreePhaseMixture_H
+#define temperaturePhaseChangeThreePhaseMixture_H
 
-#include "thermoIncompressibleTwoPhaseMixture.H"
+#include "thermoIncompressibleThreePhaseMixture.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "volFields.H"
@@ -47,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class temperaturePhaseChangeTwoPhaseMixture Declaration
+           Class temperaturePhaseChangeThreePhaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
-class temperaturePhaseChangeTwoPhaseMixture
+class temperaturePhaseChangeThreePhaseMixture
 :
     public IOdictionary
 {
@@ -59,8 +59,8 @@ protected:
 
     // Protected data
 
-        //- Reference to the thermoIncompressibleTwoPhaseMixture
-        const thermoIncompressibleTwoPhaseMixture& mixture_;
+        //- Reference to the thermoIncompressibleThreePhaseMixture
+        const thermoIncompressibleThreePhaseMixture& mixture_;
 
         //- Reference to fvMesh
         const fvMesh& mesh_;
@@ -69,19 +69,19 @@ protected:
     // Private Member Functions
 
         //- No copy construct
-        temperaturePhaseChangeTwoPhaseMixture
+        temperaturePhaseChangeThreePhaseMixture
         (
-            const temperaturePhaseChangeTwoPhaseMixture&
+            const temperaturePhaseChangeThreePhaseMixture&
         ) = delete;
 
         //- No copy assignment
-        void operator=(const temperaturePhaseChangeTwoPhaseMixture&) = delete;
+        void operator=(const temperaturePhaseChangeThreePhaseMixture&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("temperaturePhaseChangeTwoPhaseMixture");
+    TypeName("temperaturePhaseChangeThreePhaseMixture");
 
 
     // Declare run-time constructor selection table
@@ -89,10 +89,10 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            temperaturePhaseChangeTwoPhaseMixture,
+            temperaturePhaseChangeThreePhaseMixture,
             components,
             (
-                const thermoIncompressibleTwoPhaseMixture& mixture,
+                const thermoIncompressibleThreePhaseMixture& mixture,
                 const fvMesh& mesh
             ),
             (mixture, mesh)
@@ -102,9 +102,9 @@ public:
     // Selectors
 
         //- Return a reference to the selected phaseChange model
-        static autoPtr<temperaturePhaseChangeTwoPhaseMixture> New
+        static autoPtr<temperaturePhaseChangeThreePhaseMixture> New
         (
-            const thermoIncompressibleTwoPhaseMixture& mixture,
+            const thermoIncompressibleThreePhaseMixture& mixture,
             const fvMesh& mesh
         );
 
@@ -112,15 +112,15 @@ public:
     // Constructors
 
         //- Construct from components
-        temperaturePhaseChangeTwoPhaseMixture
+        temperaturePhaseChangeThreePhaseMixture
         (
-            const thermoIncompressibleTwoPhaseMixture& mixture,
+            const thermoIncompressibleThreePhaseMixture& mixture,
             const fvMesh& mesh
         );
 
 
     //- Destructor
-    virtual ~temperaturePhaseChangeTwoPhaseMixture()
+    virtual ~temperaturePhaseChangeThreePhaseMixture()
     {}
 
 

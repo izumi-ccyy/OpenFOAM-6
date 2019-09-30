@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::twoPhaseMixtureEThermo
+    Foam::threePhaseMixtureEThermo
 
 Description
     Two phases thermo Internal energy mixture Defined as:
@@ -31,17 +31,17 @@ Description
     e = (alpha1*rho1*e1 + alpha2*rho2*e2) / (alpha1*rho1 + alpha2*rho2)
 
 SourceFiles
-    twoPhaseMixtureEThermo.C
+    threePhaseMixtureEThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef twoPhaseMixtureEThermo_H
-#define twoPhaseMixtureEThermo_H
+#ifndef threePhaseMixtureEThermo_H
+#define threePhaseMixtureEThermo_H
 
 #include "volFields.H"
 
 #include "basicThermo.H"
-#include "thermoIncompressibleTwoPhaseMixture.H" // include Mixure
+#include "thermoIncompressibleThreePhaseMixture.H" // include Mixure
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,13 +49,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class twoPhaseMixtureEThermo Declaration
+                    Class threePhaseMixtureEThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-class twoPhaseMixtureEThermo
+class threePhaseMixtureEThermo
 :
     public basicThermo,
-    public thermoIncompressibleTwoPhaseMixture
+    public thermoIncompressibleThreePhaseMixture
 {
 
 protected:
@@ -83,10 +83,10 @@ protected:
 
 public:
 
-    TypeName("twoPhaseMixtureEThermo");
+    TypeName("threePhaseMixtureEThermo");
 
     // Constructor
-    twoPhaseMixtureEThermo
+    threePhaseMixtureEThermo
     (
         const volVectorField& U,
         const surfaceScalarField& phi
@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~twoPhaseMixtureEThermo() = default;
+    virtual ~threePhaseMixtureEThermo() = default;
 
 
     // Member Functions

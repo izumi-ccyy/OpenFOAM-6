@@ -23,20 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoIncompressibleTwoPhaseMixture.H"
+#include "thermoIncompressibleThreePhaseMixture.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(thermoIncompressibleTwoPhaseMixture, 0);
+    defineTypeNameAndDebug(thermoIncompressibleThreePhaseMixture, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::thermoIncompressibleTwoPhaseMixture::thermoIncompressibleTwoPhaseMixture
+Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixture
 (
     const volVectorField& U,
     const surfaceScalarField& phi
@@ -112,7 +112,7 @@ Foam::thermoIncompressibleTwoPhaseMixture::thermoIncompressibleTwoPhaseMixture
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::thermoIncompressibleTwoPhaseMixture::read()
+bool Foam::thermoIncompressibleThreePhaseMixture::read()
 {
     if (incompressibleTwoPhaseMixture::read())
     {

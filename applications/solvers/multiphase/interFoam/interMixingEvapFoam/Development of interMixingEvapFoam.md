@@ -9,6 +9,10 @@
 ## temperaturePhaseChangeTwoPhaseMixtures
 
 + rename `temperaturePhaseChangeTwoPhaseMixtures` as `temperaturePhaseChangeThreePhaseMixtures` and the following files
++ modify `options` and `files` in `Make`
++ modify files in `temperaturePhaseChangeThreePhaseMixture`
++ moditf files in `thermoIncompressibleThreePhaseMixture`
++ modify files in `threePhaseMixtureEThermo`
 
 
 ## interMixingEvapFoam.C

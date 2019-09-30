@@ -23,26 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "temperaturePhaseChangeTwoPhaseMixture.H"
+#include "temperaturePhaseChangeThreePhaseMixture.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(temperaturePhaseChangeTwoPhaseMixture, 0);
+    defineTypeNameAndDebug(temperaturePhaseChangeThreePhaseMixture, 0);
     defineRunTimeSelectionTable
     (
-        temperaturePhaseChangeTwoPhaseMixture,
+        temperaturePhaseChangeThreePhaseMixture,
         components
     );
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::temperaturePhaseChangeTwoPhaseMixture::
-temperaturePhaseChangeTwoPhaseMixture
+Foam::temperaturePhaseChangeThreePhaseMixture::
+temperaturePhaseChangeThreePhaseMixture
 (
-    const thermoIncompressibleTwoPhaseMixture& mixture,
+    const thermoIncompressibleThreePhaseMixture& mixture,
     const fvMesh& mesh
 )
 :
@@ -65,7 +65,7 @@ temperaturePhaseChangeTwoPhaseMixture
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
-Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
+Foam::temperaturePhaseChangeThreePhaseMixture::vDotAlphal() const
 {
     volScalarField alphalCoeff
     (
@@ -84,7 +84,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::vDotAlphal() const
 
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
-Foam::temperaturePhaseChangeTwoPhaseMixture::vDot() const
+Foam::temperaturePhaseChangeThreePhaseMixture::vDot() const
 {
     dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
     Pair<tmp<volScalarField>> mDot = this->mDot();
@@ -93,7 +93,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::vDot() const
 }
 
 
-bool Foam::temperaturePhaseChangeTwoPhaseMixture::read()
+bool Foam::temperaturePhaseChangeThreePhaseMixture::read()
 {
     if (regIOobject::read())
     {

@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoIncompressibleTwoPhaseMixture
+    Foam::thermoIncompressibleThreePhaseMixture
 
 Description
     A two-phase incompressible transportModel
 
 SourceFiles
-    thermoIncompressibleTwoPhaseMixture.C
+    thermoIncompressibleThreePhaseMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoIncompressibleTwoPhaseMixture_H
-#define thermoIncompressibleTwoPhaseMixture_H
+#ifndef thermoIncompressibleThreePhaseMixture_H
+#define thermoIncompressibleThreePhaseMixture_H
 
 #include "incompressibleTwoPhaseMixture.H"
 
@@ -43,10 +43,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class thermoIncompressibleTwoPhaseMixture Declaration
+              Class thermoIncompressibleThreePhaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoIncompressibleTwoPhaseMixture
+class thermoIncompressibleThreePhaseMixture
 :
     public incompressibleTwoPhaseMixture
 {
@@ -71,13 +71,13 @@ protected:
 
 public:
 
-    TypeName("thermoIncompressibleTwoPhaseMixture");
+    TypeName("thermoIncompressibleThreePhaseMixture");
 
 
     // Constructors
 
         //- Construct from U and phi
-        thermoIncompressibleTwoPhaseMixture
+        thermoIncompressibleThreePhaseMixture
         (
             const volVectorField& U,
             const surfaceScalarField& phi
@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~thermoIncompressibleTwoPhaseMixture()
+    virtual ~thermoIncompressibleThreePhaseMixture()
     {}
 
 

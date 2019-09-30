@@ -23,15 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "temperaturePhaseChangeTwoPhaseMixture.H"
+#include "temperaturePhaseChangeThreePhaseMixture.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::temperaturePhaseChangeTwoPhaseMixture>
-Foam::temperaturePhaseChangeTwoPhaseMixture::New
+Foam::autoPtr<Foam::temperaturePhaseChangeThreePhaseMixture>
+Foam::temperaturePhaseChangeThreePhaseMixture::New
 (
-    const thermoIncompressibleTwoPhaseMixture& thermo,
+    const thermoIncompressibleThreePhaseMixture& thermo,
     const fvMesh& mesh
 )
 {
@@ -60,14 +60,14 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown temperaturePhaseChangeTwoPhaseMixture type "
+            << "Unknown temperaturePhaseChangeThreePhaseMixture type "
             << modelType << nl << nl
-            << "Valid temperaturePhaseChangeTwoPhaseMixture types :" << endl
+            << "Valid temperaturePhaseChangeThreePhaseMixture types :" << endl
             << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<temperaturePhaseChangeTwoPhaseMixture>
+    return autoPtr<temperaturePhaseChangeThreePhaseMixture>
         (cstrIter()(thermo, mesh));
 }
 
