@@ -30,17 +30,27 @@ volVectorField U
 
 #include "createPhi.H"
 
-immiscibleIncompressibleThreePhaseMixture mixture(U, phi);
+// Creating e based thermo
+autoPtr<threePhaseMixtureEThermo> thermo // thermo, defined by twoPhaseMixtureEThermo
+(
+    new threePhaseMixtureEThermo(U, phi)
+);
+
+// Create mixture and
+Info<< "Creating temperaturePhaseChangeThreePhaseMixture\n" << endl;
+autoPtr<temperaturePhaseChangeThreePhaseMixture> mixture =
+    temperaturePhaseChangeThreePhaseMixture::New(thermo(), mesh); // mixture, defined by left
+
 
 // three alpha
-volScalarField& alpha1(mixture.alpha1());
-volScalarField& alpha2(mixture.alpha2());
-volScalarField& alpha3(mixture.alpha3());
+volScalarField& alpha1(thermo->alpha1());
+volScalarField& alpha2(thermo->alpha2());
+volScalarField& alpha3(thermo->alpha3());
 
 // three rho
-const dimensionedScalar& rho1 = mixture.rho1();
-const dimensionedScalar& rho2 = mixture.rho2();
-const dimensionedScalar& rho3 = mixture.rho3();
+const dimensionedScalar& rho1 = thermo->rho1();
+const dimensionedScalar& rho2 = thermo->rho2();
+const dimensionedScalar& rho3 = thermo->rho3();
 
 dimensionedScalar D23("D23", dimViscosity, mixture);
 
@@ -88,18 +98,7 @@ autoPtr<incompressible::turbulenceModel> turbulence
 #include "gh.H"
 
 
-volScalarField p
-(
-    IOobject
-    (
-        "p",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    p_rgh + rho*gh
-);
+volScalarField& p = thermo->p(); // define pressure from thermo
 
 label pRefCell = 0;
 scalar pRefValue = 0.0;
@@ -125,6 +124,38 @@ if (p_rgh.needReference())
 
 mesh.setFluxRequired(p_rgh.name());
 mesh.setFluxRequired(alpha2.name());
+
+// Turbulent Prandtl number
+dimensionedScalar Prt("Prt", dimless, thermo->transportPropertiesDict()); // define Prt from thermo
+
+volScalarField kappaEff // define kappaEff by thermo
+(
+    IOobject
+    (
+        "kappaEff",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    thermo->kappa()
+);
+
+// Need to store rho for ddt(rhoCp, U)
+volScalarField rhoCp // define rho * cp by thermo
+(
+    IOobject
+    (
+        "rhoCp",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    rho*thermo->Cp()
+);
+
+rhoCp.oldTime();
 
 #include "createMRF.H"
 #include "createFvOptions.H"

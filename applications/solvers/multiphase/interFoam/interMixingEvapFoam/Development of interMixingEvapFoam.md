@@ -1,4 +1,54 @@
-# Preparation
+- [Preparation for Thermal and Multiphase Models](#preparation-for-thermal-and-multiphase-models)
+  - [temperaturePhaseChangeTwoPhaseMixtures](#temperaturephasechangetwophasemixtures)
+  - [thermoIncompressibleThreePhaseMixture](#thermoincompressiblethreephasemixture)
+    - [thermoIncompressibleThreePhaseMixture.H](#thermoincompressiblethreephasemixtureh)
+    - [thermoIncompressibleThreePhaseMixture.C](#thermoincompressiblethreephasemixturec)
+  - [threePhaseMixtureEThermo](#threephasemixtureethermo)
+    - [threePhaseMixtureEThermo.H](#threephasemixtureethermoh)
+    - [threePhaseMixtureEThermo.C](#threephasemixtureethermoc)
+      - [init()](#init)
+      - [correct()](#correct)
+      - [he(p, T)](#hep-t)
+      - [h(p, T, celli)](#hp-t-celli)
+      - [h(p, T, patchi)](#hp-t-patchi)
+      - [Cp()](#cp)
+      - [Cp(p, T, patchi)](#cpp-t-patchi)
+      - [rho()](#rho)
+      - [rho(patchi)](#rhopatchi)
+      - [Cv()](#cv)
+      - [Cv(p, T, patchi)](#cvp-t-patchi)
+      - [gamma()](#gamma)
+      - [kappa()](#kappa)
+      - [kappa(patchi)](#kappapatchi)
+      - [kappaEff(kappat, patchi)](#kappaeffkappat-patchi)
+      - [alphaEff(alphat)](#alphaeffalphat)
+      - [alphaEff(alphat, patchi)](#alphaeffalphat-patchi)
+  - [temperaturePhaseChangeThreePhaseMixture](#temperaturephasechangethreephasemixture)
+    - [temperaturePhaseChangeThreePhaseMixture.H](#temperaturephasechangethreephasemixtureh)
+    - [temperaturePhaseChangeThreePhaseMixture.C](#temperaturephasechangethreephasemixturec)
+    - [newtemperaturePhaseChangeThreePhaseMixture.C](#newtemperaturephasechangethreephasemixturec)
+- [Modification to Solver](#modification-to-solver)
+  - [createFields.H](#createfieldsh)
+  - [UEqn.H](#ueqnh)
+  - [pEqn.H](#peqnh)
+  - [TEqn.H](#teqnh)
+  - [interMixingEvapFoam.C](#intermixingevapfoamc)
+- [Theory](#theory)
+  - [Definition](#definition)
+  - [Tracing variable](#tracing-variable)
+  - [Evaporation Rate](#evaporation-rate)
+    - [Interface Area Estimation](#interface-area-estimation)
+    - [Vapor Concentration Gradient Calculation](#vapor-concentration-gradient-calculation)
+  - [Energy Equation](#energy-equation)
+  - [Modification of Governing Equations](#modification-of-governing-equations)
+    - [Continuity Equation](#continuity-equation)
+    - [Volume-of-Fluid Equations](#volume-of-fluid-equations)
+- [compressibleInterFoam](#compressibleinterfoam)
+  - [Structure](#structure)
+  - [twoPhaseMixtureThermo](#twophasemixturethermo)
+    - [twoPhaseMixtureThermo.H](#twophasemixturethermoh)
+
+# Preparation for Thermal and Multiphase Models
 
 + copy and rename `interMixingFoam` as `interMixingEvapFoam`
 + rename `interMixingFoam.C` as `interMixingEvapFoam.C`
@@ -533,7 +583,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::kappa
 }
 ```
 
-### kappaEff(kappat, patchi)
+#### kappaEff(kappat, patchi)
 
 ```cpp
 Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::kappaEff
@@ -622,6 +672,140 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::alphaEff
     return kappa/Cp/rho + alphat;
 }
 ```
+
+## temperaturePhaseChangeThreePhaseMixture
+
+### temperaturePhaseChangeThreePhaseMixture.H
+
+no change
+
+### temperaturePhaseChangeThreePhaseMixture.C
+
+no change
+
+### newtemperaturePhaseChangeThreePhaseMixture.C
+
+```cpp
+const word modelType
+(
+    phaseChangePropertiesDict.get<word>("phaseChangeThreePhaseModel")
+);
+```
+
+# Modification to Solver
+
+## createFields.H
+
+```cpp
+// Creating e based thermo
+autoPtr<threePhaseMixtureEThermo> thermo // thermo, defined by twoPhaseMixtureEThermo
+(
+    new threePhaseMixtureEThermo(U, phi)
+);
+
+// Create mixture and
+Info<< "Creating temperaturePhaseChangeThreePhaseMixture\n" << endl;
+autoPtr<temperaturePhaseChangeThreePhaseMixture> mixture =
+    temperaturePhaseChangeThreePhaseMixture::New(thermo(), mesh); // mixture, defined by left
+
+
+// three alpha
+volScalarField& alpha1(thermo->alpha1());
+volScalarField& alpha2(thermo->alpha2());
+volScalarField& alpha3(thermo->alpha3());
+
+// three rho
+const dimensionedScalar& rho1 = thermo->rho1();
+const dimensionedScalar& rho2 = thermo->rho2();
+const dimensionedScalar& rho3 = thermo->rho3();
+```
+
+```cpp
+volScalarField& p = thermo->p(); // define pressure from thermo
+```
+
+```cpp
+// Turbulent Prandtl number
+dimensionedScalar Prt("Prt", dimless, thermo->transportPropertiesDict()); // define Prt from thermo
+
+volScalarField kappaEff // define kappaEff by thermo
+(
+    IOobject
+    (
+        "kappaEff",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    thermo->kappa()
+);
+
+// Need to store rho for ddt(rhoCp, U)
+volScalarField rhoCp // define rho * cp by thermo
+(
+    IOobject
+    (
+        "rhoCp",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    rho*thermo->Cp()
+);
+
+rhoCp.oldTime();
+```
+
+## UEqn.H
+
+No need to modify!
+
+## pEqn.H
+
+$$
+\nabla \mathbf{U} = - \dot m ''' (\frac{1}{\rho_v} - \frac{1}{\rho_l})
+$$
+
+Add volume flow rate
+
+```cpp
+// get mass flow rate for continuity equation
+Pair<tmp<volScalarField>> vDot = mixture->vDot();
+const volScalarField& vDotc = vDot[0]();
+const volScalarField& vDotv = vDot[1]();
+```
+
+Modify $p_{rgh}$ Equation
+
+```cpp
+fvScalarMatrix p_rghEqn // div (grad p / Ap) = div (phiHbyA)
+(
+    fvm::laplacian(rAUf, p_rgh) == fvc::div(phiHbyA) - (vDotc - vDotv)
+);
+```
+
+## TEqn.H
+
+Copy $T$ Equantion to here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## interMixingEvapFoam.C

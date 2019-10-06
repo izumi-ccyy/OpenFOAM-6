@@ -38,11 +38,16 @@
     // Update the pressure BCs to ensure flux consistency
     constrainPressure(p_rgh, U, phiHbyA, rAUf, MRF);
 
+    // get mass flow rate for continuity equation
+    Pair<tmp<volScalarField>> vDot = mixture->vDot();
+    const volScalarField& vDotc = vDot[0]();
+    const volScalarField& vDotv = vDot[1]();
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn // div (grad p / Ap) = div (phiHbyA)
         (
-            fvm::laplacian(rAUf, p_rgh) == fvc::div(phiHbyA)
+            fvm::laplacian(rAUf, p_rgh) == fvc::div(phiHbyA) - (vDotc - vDotv)
         );
 
         p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
