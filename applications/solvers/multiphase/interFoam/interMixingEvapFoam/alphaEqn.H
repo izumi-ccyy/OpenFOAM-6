@@ -38,6 +38,12 @@
             false   // Use slices for the couples
         );
 
+        // add mass flow rate
+        Pair<tmp<volScalarField>> vDotAlphalA = mixture->mDot();
+
+        const volScalarField& vDotcAlphalA = vDotAlphalA[0]();
+        const volScalarField& vDotvAlphalA = vDotAlphalA[1]();
+        const volScalarField vDotvmcAlphalA(vDotvAlphalA - vDotcAlphalA);
 
         // Create the complete convection flux for alpha1
         surfaceScalarField alphaPhi1 // add compression
@@ -60,6 +66,7 @@
                 alpha1,
                 alpharScheme
             )
+          + vDotcAlphalA / rho1  // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha1
@@ -123,6 +130,7 @@
                 alpha2,
                 alpharScheme
             )
+          + vDotcAlphalA / rho2 // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha2

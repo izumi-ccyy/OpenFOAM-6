@@ -36,7 +36,8 @@ Description
 #include "CMULES.H"
 #include "localEulerDdtScheme.H"
 #include "subCycle.H"
-#include "immiscibleIncompressibleThreePhaseMixture.H"
+#include "threePhaseMixtureEThermo.H"
+#include "temperaturePhaseChangeThreePhaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
@@ -57,6 +58,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initCorrectPhi.H"
     #include "createUfIfPresent.H"
+
+    volScalarField& T = thermo->T();
 
     turbulence->validate();
 
@@ -131,6 +134,7 @@ int main(int argc, char *argv[])
             mixture.correct();
 
             #include "UEqn.H"
+            #include "TEqn.H"
 
             // --- Pressure corrector loop
             while (pimple.correct())

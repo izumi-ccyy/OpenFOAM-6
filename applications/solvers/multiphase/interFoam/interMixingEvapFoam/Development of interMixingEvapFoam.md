@@ -1,4 +1,5 @@
 - [Preparation for Thermal and Multiphase Models](#preparation-for-thermal-and-multiphase-models)
+  - [interMixingEvapFoam.C](#intermixingevapfoamc)
   - [temperaturePhaseChangeTwoPhaseMixtures](#temperaturephasechangetwophasemixtures)
   - [thermoIncompressibleThreePhaseMixture](#thermoincompressiblethreephasemixture)
     - [thermoIncompressibleThreePhaseMixture.H](#thermoincompressiblethreephasemixtureh)
@@ -32,7 +33,8 @@
   - [UEqn.H](#ueqnh)
   - [pEqn.H](#peqnh)
   - [TEqn.H](#teqnh)
-  - [interMixingEvapFoam.C](#intermixingevapfoamc)
+  - [interMixingEvapFoam.C](#intermixingevapfoamc-1)
+  - [alphaEqn.H](#alphaeqnh)
 - [Theory](#theory)
   - [Definition](#definition)
   - [Tracing variable](#tracing-variable)
@@ -55,6 +57,10 @@
 + modify Make folder, modify `files`
 + copy `UEqn.H` and `pEqn.H` from interFoam to here, since `pEqn.H` should be modified later
 + copy `temperaturePhaseChangeTwoPhaseMixtures` folder and `Allwmake` and `Allwclean` from `interCondensationEvaporationFoam` of `OpenFOAM-PLUS`
+
+## interMixingEvapFoam.C
+
++ replace all `interMixingFoam` with `interMixingEvapFoam`
 
 ## temperaturePhaseChangeTwoPhaseMixtures
 
@@ -786,31 +792,130 @@ fvScalarMatrix p_rghEqn // div (grad p / Ap) = div (phiHbyA)
 );
 ```
 
+in vDot()
+
+```cpp
+Foam::Pair<Foam::tmp<Foam::volScalarField>>
+Foam::temperaturePhaseChangeThreePhaseMixture::vDot() const
+{
+    dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
+    Pair<tmp<volScalarField>> mDot = this->mDot();
+
+    return Pair<tmp<volScalarField>>(pCoeff*mDot[0], pCoeff*mDot[1]);
+}
+```
+
+$$
+vDotc = vDot[0] = \dot m_C (\frac{1}{\rho_1} - \frac{1}{\rho_2}) = \dot m_C (\frac{1}{\rho_l} - \frac{1}{\rho_v})
+$$
+
+$$
+vDotv = vDot[1] = \dot m_E (\frac{1}{\rho_1} - \frac{1}{\rho_2}) = \dot m_E (\frac{1}{\rho_l} - \frac{1}{\rho_v})
+$$
+
+$$
+vDotc - vDotv = (\dot m_C - \dot m_E) (\frac{1}{\rho_l} - \frac{1}{\rho_v}) = - (\dot m_C - \dot m_E) (\frac{1}{\rho_v} - \frac{1}{\rho_l}) = (\dot m_E - \dot m_C) (\frac{1}{\rho_v} - \frac{1}{\rho_l}) = - \dot m ''' (\frac{1}{\rho_v} - \frac{1}{\rho_l})
+$$
+
 ## TEqn.H
 
 Copy $T$ Equantion to here.
 
+$$
+\frac{\partial}{\partial t} (\rho c_p T) + \nabla \cdot (\rho c_p \mathbf{U} T) = \nabla \cdot (\lambda \nabla T) - \Delta h_v \dot m '''
+$$
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+No need to change
 
 ## interMixingEvapFoam.C
 
-+ replace all `interMixingFoam` with `interMixingEvapFoam`
+```cpp
+#include "threePhaseMixtureEThermo.H"
+#include "temperaturePhaseChangeThreePhaseMixture.H"
+```
+
+```cpp
+volScalarField& T = thermo->T();
+```
+
+```cpp
+#include "TEqn.H"
+```
+
+## alphaEqn.H
+
+```cpp
+// add mass flow rate
+Pair<tmp<volScalarField>> vDotAlphalA = mixture->mDot();
+
+const volScalarField& vDotcAlphalA = vDotAlphalA[0]();
+const volScalarField& vDotvAlphalA = vDotAlphalA[1]();
+const volScalarField vDotvmcAlphalA(vDotvAlphalA - vDotcAlphalA);
+```
+
+```cpp
+surfaceScalarField alphaPhi1 // add compression
+(
+    fvc::flux
+    (
+        phi,
+        alpha1,
+        alphaScheme
+    )
+    + fvc::flux // compression for alpha2
+    (
+        -fvc::flux(-phir, alpha2, alpharScheme),
+        alpha1,
+        alpharScheme
+    )
+    + fvc::flux // compression for alpha3
+    (
+        -fvc::flux(-phir, alpha3, alpharScheme),
+        alpha1,
+        alpharScheme
+    )
+    + vDotcAlphalA / rho1  // add mass loss
+);
+```
+
+```cpp
+surfaceScalarField alphaPhi2 // interface only exsists between 1 and 2, 1 and 3
+(
+    fvc::flux
+    (
+        phi,
+        alpha2,
+        alphaScheme
+    )
+    + fvc::flux // add compression between 1 and 2
+    (
+        -fvc::flux(phir, alpha1, alpharScheme),
+        alpha2,
+        alpharScheme
+    )
+    + vDotcAlphalA / rho2 // add mass loss
+);
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Theory
 

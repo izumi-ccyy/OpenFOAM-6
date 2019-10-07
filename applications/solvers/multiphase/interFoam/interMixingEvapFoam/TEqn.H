@@ -8,6 +8,7 @@
 
     const surfaceScalarField rhoCpPhi(fvc::interpolate(cp)*rhoPhi);
 
+    // mDot
     Pair<tmp<volScalarField>> vDotAlphal = mixture->mDot();
 
     const volScalarField& vDotcAlphal = vDotAlphal[0]();
