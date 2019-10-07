@@ -35,6 +35,10 @@
   - [TEqn.H](#teqnh)
   - [interMixingEvapFoam.C](#intermixingevapfoamc-1)
   - [alphaEqn.H](#alphaeqnh)
+- [Compile](#compile)
+  - [Make](#make)
+    - [files](#files)
+    - [options](#options)
 - [Theory](#theory)
   - [Definition](#definition)
   - [Tracing variable](#tracing-variable)
@@ -895,6 +899,34 @@ surfaceScalarField alphaPhi2 // interface only exsists between 1 and 2, 1 and 3
     )
     + vDotcAlphalA / rho2 // add mass loss
 );
+```
+
+# Compile
+
+## Make
+
+### files
+
+```cpp
+temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixtures/newtemperaturePhaseChangeThreePhaseMixture.C
+temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixture.C
+temperaturePhaseChangeThreePhaseMixtures/thermoIncompressibleThreePhaseMixture/thermoIncompressibleThreePhaseMixture.C
+temperaturePhaseChangeThreePhaseMixtures/threePhaseMixtureEThermo/threePhaseMixtureEThermo.C
+temperaturePhaseChangeThreePhaseMixtures/constant/constant.C
+```
+
+### options
+
+```cpp
+-InewtemperaturePhaseChangeThreePhaseMixture \
+-ItemperaturePhaseChangeThreePhaseMixture \
+-IthermoIncompressibleThreePhaseMixture \
+-IthreePhaseMixtureEThermo \
+-Iconstant \
+```
+
+```cpp
+-lfluidThermophysicalModels
 ```
 
 
