@@ -56,6 +56,8 @@ class incompressibleThreePhaseMixture
 {
     // Private data
 
+protected:
+
         word phase1Name_;
         word phase2Name_;
         word phase3Name_;

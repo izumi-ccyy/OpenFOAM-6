@@ -131,7 +131,7 @@ Foam::thermoIncompressibleThreePhaseMixture::thermoIncompressibleThreePhaseMixtu
         dimEnergy/dimMass,
         subDict(phase2Name_),
         "hf"
-    )
+    ),
 
     Hf3_
     (
@@ -152,21 +152,38 @@ bool Foam::thermoIncompressibleThreePhaseMixture::read()
     if (immiscibleIncompressibleThreePhaseMixture::read())
     {
         // add functions for phase 3
+        /*
         subDict(phase1Name_).readEntry("kappa", kappa1_);
         subDict(phase2Name_).readEntry("kappa", kappa2_);
-        subDict(phase2Name_).readEntry("kappa", kappa3_);
+        subDict(phase3Name_).readEntry("kappa", kappa3_);
 
         subDict(phase1Name_).readEntry("Cp", Cp1_);
         subDict(phase2Name_).readEntry("Cp", Cp2_);
-        subDict(phase2Name_).readEntry("Cp", Cp3_);
+        subDict(phase3Name_).readEntry("Cp", Cp3_);
 
         subDict(phase1Name_).readEntry("Cv", Cv1_);
         subDict(phase2Name_).readEntry("Cv", Cv2_);
-        subDict(phase2Name_).readEntry("Cv", Cv3_);
+        subDict(phase3Name_).readEntry("Cv", Cv3_);
 
         subDict(phase1Name_).readEntry("hf", Hf1_);
         subDict(phase2Name_).readEntry("hf", Hf2_);
-        subDict(phase2Name_).readEntry("hf", Hf3_);
+        subDict(phase3Name_).readEntry("hf", Hf3_);
+        */
+        subDict(phase1Name_).lookup("kappa") >> kappa1_;
+        subDict(phase2Name_).lookup("kappa") >> kappa2_;
+        subDict(phase3Name_).lookup("kappa") >> kappa3_;
+
+        subDict(phase1Name_).lookup("Cp") >> Cp1_;
+        subDict(phase2Name_).lookup("Cp") >> Cp2_;
+        subDict(phase3Name_).lookup("Cp") >> Cp3_;
+
+        subDict(phase1Name_).lookup("Cv") >> Cv1_;
+        subDict(phase2Name_).lookup("Cv") >> Cv2_;
+        subDict(phase3Name_).lookup("Cv") >> Cv3_;
+
+        subDict(phase1Name_).lookup("hf") >> Hf1_;
+        subDict(phase2Name_).lookup("hf") >> Hf2_;
+        subDict(phase3Name_).lookup("hf") >> Hf3_;
 
         return true;
     }

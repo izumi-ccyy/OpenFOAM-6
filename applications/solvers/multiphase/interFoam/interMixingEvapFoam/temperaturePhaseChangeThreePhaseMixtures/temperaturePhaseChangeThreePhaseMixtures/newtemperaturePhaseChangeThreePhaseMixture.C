@@ -50,14 +50,14 @@ Foam::temperaturePhaseChangeThreePhaseMixture::New
 
     const word modelType
     (
-        phaseChangePropertiesDict.get<word>("phaseChangeThreePhaseModel")
+        phaseChangePropertiesDict.lookup("phaseChangeThreePhaseModel")
     );
 
     Info<< "Selecting phaseChange model " << modelType << endl;
 
-    auto cstrIter = componentsConstructorTablePtr_->cfind(modelType);
+    auto cstrIter = componentsConstructorTablePtr_->find(modelType);
 
-    if (!cstrIter.found())
+    if (cstrIter == componentsConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown temperaturePhaseChangeThreePhaseMixture type "

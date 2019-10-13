@@ -1,5 +1,7 @@
 - [Preparation for Thermal and Multiphase Models](#preparation-for-thermal-and-multiphase-models)
   - [interMixingEvapFoam.C](#intermixingevapfoamc)
+  - [incompressibleThreePhaseMixture](#incompressiblethreephasemixture)
+    - [incompressibleThreePhaseMixture.H](#incompressiblethreephasemixtureh)
   - [temperaturePhaseChangeTwoPhaseMixtures](#temperaturephasechangetwophasemixtures)
   - [thermoIncompressibleThreePhaseMixture](#thermoincompressiblethreephasemixture)
     - [thermoIncompressibleThreePhaseMixture.H](#thermoincompressiblethreephasemixtureh)
@@ -66,6 +68,58 @@
 
 + replace all `interMixingFoam` with `interMixingEvapFoam`
 
+## incompressibleThreePhaseMixture
+
+### incompressibleThreePhaseMixture.H
+
+Because `phase1Name_`, `phase1Name_` and `phase1Name_` can not be inquired, compare it with interCondesationEvaporationFoam, they are declared as protected as:
+
+```cpp
+protected:
+
+    // Protected data
+
+        word phase1Name_;
+        word phase2Name_;
+
+        volScalarField alpha1_;
+        volScalarField alpha2_;
+```
+
+so modify it as:
+
+```cpp
+protected:
+
+        word phase1Name_;
+        word phase2Name_;
+        word phase3Name_;
+
+        volScalarField alpha1_;
+        volScalarField alpha2_;
+        volScalarField alpha3_;
+
+        const volVectorField& U_;
+        const surfaceScalarField& phi_;
+
+        volScalarField nu_;
+
+        autoPtr<viscosityModel> nuModel1_;
+        autoPtr<viscosityModel> nuModel2_;
+        autoPtr<viscosityModel> nuModel3_;
+
+        dimensionedScalar rho1_;
+        dimensionedScalar rho2_;
+        dimensionedScalar rho3_;
+
+
+    // Private Member Functions
+
+        //- Calculate and return the laminar viscosity
+        void calcNu();
+
+```
+
 ## temperaturePhaseChangeTwoPhaseMixtures
 
 + rename `temperaturePhaseChangeTwoPhaseMixtures` as `temperaturePhaseChangeThreePhaseMixtures` and the following files
@@ -118,7 +172,51 @@ const dimensionedScalar& Hf3() const
 
 ### thermoIncompressibleThreePhaseMixture.C
 
-In the defination of mixture
+In the defination of mixture, difination method is different, so it should be modified.
+
+For example in `applications\solvers\multiphase\driftFluxFoam\mixtureViscosityModels\BinghamPlastic\BinghamPlastic.H`:
+
+```cpp
+protected:
+
+    // Protected data
+
+        //- Yield stress coefficient
+        dimensionedScalar yieldStressCoeff_;
+
+        //- Yield stress exponent
+        dimensionedScalar yieldStressExponent_;
+
+        //- Yield stress offset
+        dimensionedScalar yieldStressOffset_;
+
+        //- Velocity
+        const volVectorField& U_;
+```
+
+in  `applications\solvers\multiphase\driftFluxFoam\mixtureViscosityModels\BinghamPlastic\BinghamPlastic.C`
+
+```cpp
+yieldStressCoeff_
+(
+    "BinghamCoeff",
+    dimensionSet(1, -1, -2, 0, 0),
+    plasticCoeffs_
+),
+yieldStressExponent_
+(
+    "BinghamExponent",
+    dimless,
+    plasticCoeffs_
+),
+yieldStressOffset_
+(
+    "BinghamOffset",
+    dimless,
+    plasticCoeffs_
+),
+U_(U)
+```
 
 ```cpp
 kappa3_
@@ -157,10 +255,10 @@ Hf3_
 In the defination of member function
 
 ```cpp
-subDict(phase2Name_).readEntry("kappa", kappa3_);
-subDict(phase2Name_).readEntry("Cp", Cp3_);
-subDict(phase2Name_).readEntry("Cv", Cv3_);
-subDict(phase2Name_).readEntry("hf", Hf3_);
+subDict(phase3Name_).readEntry("kappa", kappa3_);
+subDict(phase3Name_).readEntry("Cp", Cp3_);
+subDict(phase3Name_).readEntry("Cv", Cv3_);
+subDict(phase3Name_).readEntry("hf", Hf3_);
 ```
 
 ## threePhaseMixtureEThermo
@@ -700,6 +798,98 @@ const word modelType
 (
     phaseChangePropertiesDict.get<word>("phaseChangeThreePhaseModel")
 );
+```
+
+There is a difference in IOdictionary between two editions. Take `driftFluxFoam/mixtureViscosityModel` as example in `.com` edition
+
+mixtureViscosityModel.H
+
+```cpp
+Foam::autoPtr<Foam::mixtureViscosityModel> Foam::mixtureViscosityModel::New
+(
+    const word& name,
+    const dictionary& viscosityProperties,
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+{
+    const word modelType(viscosityProperties.get<word>("transportModel"));
+
+    Info<< "Selecting incompressible transport model " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown mixtureViscosityModel type "
+            << modelType << nl << nl
+            << "Valid mixtureViscosityModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<mixtureViscosityModel>
+        (cstrIter()(name, viscosityProperties, U, phi));
+}
+```
+
+in `.org` edition
+
+```cpp
+Foam::autoPtr<Foam::mixtureViscosityModel> Foam::mixtureViscosityModel::New
+(
+    const word& name,
+    const dictionary& viscosityProperties,
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+{
+    const word modelType(viscosityProperties.lookup("transportModel"));
+
+    Info<< "Selecting incompressible transport model " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorInFunction
+            << "Unknown mixtureViscosityModel type "
+            << modelType << nl << nl
+            << "Valid mixtureViscosityModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<mixtureViscosityModel>
+        (cstrIter()(name, viscosityProperties, U, phi));
+}
+```
+
+`.com` uses `get` and `cfind`, but `.org` uses `lookup` and `find`
+
+Therefore， change it as 
+
+```cpp
+const word modelType
+(
+    phaseChangePropertiesDict.lookup("phaseChangeThreePhaseModel")
+);
+
+Info<< "Selecting phaseChange model " << modelType << endl;
+
+auto cstrIter = componentsConstructorTablePtr_->find(modelType);
+
+if (cstrIter == componentsConstructorTablePtr_->end())
+{
+    FatalErrorInFunction
+        << "Unknown temperaturePhaseChangeThreePhaseMixture type "
+        << modelType << nl << nl
+        << "Valid temperaturePhaseChangeThreePhaseMixture types :" << endl
+        << componentsConstructorTablePtr_->sortedToc()
+        << exit(FatalError);
+}
 ```
 
 # Modification to Solver
