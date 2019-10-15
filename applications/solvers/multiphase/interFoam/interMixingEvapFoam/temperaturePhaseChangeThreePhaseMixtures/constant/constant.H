@@ -36,13 +36,14 @@ SourceFiles
 #ifndef constant_H
 #define constant_H
 
-#include "temperaturePhaseChangeTwoPhaseMixture.H"
+//#include "temperaturePhaseChangeThreePhaseMixture.H"
+#include "../temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace temperaturePhaseChangeTwoPhaseMixtures
+namespace temperaturePhaseChangeThreePhaseMixtures
 {
 
 /*--------------------------------------------------------------------*\
@@ -51,7 +52,7 @@ namespace temperaturePhaseChangeTwoPhaseMixtures
 
 class constant
 :
-    public temperaturePhaseChangeTwoPhaseMixture
+    public temperaturePhaseChangeThreePhaseMixture
 {
     // Private data
 
@@ -73,7 +74,7 @@ public:
         //- Construct from components
         constant
         (
-            const thermoIncompressibleTwoPhaseMixture& mixture,
+            const thermoIncompressibleThreePhaseMixture& mixture,
             const fvMesh& mesh
         );
 
@@ -108,7 +109,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace temperaturePhaseChangeTwoPhaseMixtures
+} // End namespace temperaturePhaseChangeThreePhaseMixtures
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

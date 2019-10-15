@@ -26,18 +26,18 @@ License
 #include "constant.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvcGrad.H"
-#include "twoPhaseMixtureEThermo.H"
+#include "../threePhaseMixtureEThermo/threePhaseMixtureEThermo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace temperaturePhaseChangeTwoPhaseMixtures
+namespace temperaturePhaseChangeThreePhaseMixtures
 {
     defineTypeNameAndDebug(constant, 0);
     addToRunTimeSelectionTable
     (
-        temperaturePhaseChangeTwoPhaseMixture,
+        temperaturePhaseChangeThreePhaseMixture,
         constant,
         components
     );
@@ -46,13 +46,13 @@ namespace temperaturePhaseChangeTwoPhaseMixtures
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::constant
+Foam::temperaturePhaseChangeThreePhaseMixtures::constant::constant
 (
-    const thermoIncompressibleTwoPhaseMixture& mixture,
+    const thermoIncompressibleThreePhaseMixture& mixture,
     const fvMesh& mesh
 )
 :
-    temperaturePhaseChangeTwoPhaseMixture(mixture, mesh),
+    temperaturePhaseChangeThreePhaseMixture(mixture, mesh),
     coeffC_
     (
         "coeffC", dimless/dimTime/dimTemperature, subDict(type() + "Coeffs")
@@ -67,19 +67,19 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::constant
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
-Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
+Foam::temperaturePhaseChangeThreePhaseMixtures::constant::mDotAlphal() const
 {
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
-    const twoPhaseMixtureEThermo& thermo =
-        refCast<const twoPhaseMixtureEThermo>
+    const threePhaseMixtureEThermo& thermo =
+        refCast<const threePhaseMixtureEThermo>
         (
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
 
     const dimensionedScalar& TSat = thermo.TSat();
 
-    const dimensionedScalar T0(dimTemperature, Zero);
+    const dimensionedScalar T0("T0", dimTemperature, Zero);
 
     return Pair<tmp<volScalarField>>
     (
@@ -90,7 +90,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
 
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
-Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
+Foam::temperaturePhaseChangeThreePhaseMixtures::constant::mDot() const
 {
 
     volScalarField limitedAlpha1
@@ -105,15 +105,15 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
-    const twoPhaseMixtureEThermo& thermo =
-        refCast<const twoPhaseMixtureEThermo>
+    const threePhaseMixtureEThermo& thermo =
+        refCast<const threePhaseMixtureEThermo>
         (
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
 
     const dimensionedScalar& TSat = thermo.TSat();
 
-    const dimensionedScalar T0(dimTemperature, Zero);
+    const dimensionedScalar T0("T0", dimTemperature, Zero);
 
     return Pair<tmp<volScalarField>>
     (
@@ -124,7 +124,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 
 
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
-Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
+Foam::temperaturePhaseChangeThreePhaseMixtures::constant::mDotDeltaT() const
 {
     volScalarField limitedAlpha1
     (
@@ -138,8 +138,8 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
-    const twoPhaseMixtureEThermo& thermo =
-        refCast<const twoPhaseMixtureEThermo>
+    const threePhaseMixtureEThermo& thermo =
+        refCast<const threePhaseMixtureEThermo>
         (
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
@@ -154,14 +154,14 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 }
 
 
-void Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::correct()
+void Foam::temperaturePhaseChangeThreePhaseMixtures::constant::correct()
 {
 }
 
 
-bool Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::read()
+bool Foam::temperaturePhaseChangeThreePhaseMixtures::constant::read()
 {
-    if (temperaturePhaseChangeTwoPhaseMixture::read())
+    if (temperaturePhaseChangeThreePhaseMixture::read())
     {
         /*
         subDict(type() + "Coeffs").readEntry("coeffC", coeffC_);

@@ -28,7 +28,7 @@
     surfaceScalarField phig // phig = (sigma kappa grad alpha -gh grad rho) / Ap
     (
         (
-            mixture.surfaceTensionForce()
+            thermo().surfaceTensionForce()
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf()
     );

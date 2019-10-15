@@ -244,18 +244,21 @@ Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::hc() const // de
 {
     const fvMesh& mesh = this->T_.mesh();
 
-    return tmp<volScalarField>::New
+    return tmp<volScalarField>
     (
-        IOobject
+        new volScalarField
         (
-            "hc",
-            mesh.time().timeName(),
+            IOobject
+            (
+                "hc",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
             mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("hc", Hf2() - Hf1())
+            dimensionedScalar("hc", Hf2() - Hf1())
+        )
     );
 }
 
@@ -352,8 +355,8 @@ Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::rho() const
             "rho",
             (
                 limitedAlpha1*rho1().value()
-                limitedAlpha2*rho2().value()
-              + (scalar(1) - limitedAlpha1 - limitedAlpha3)*rho3().value()
+              + limitedAlpha2*rho2().value()
+              + (scalar(1) - limitedAlpha1 - limitedAlpha2)*rho3().value()
             )
         )
     );

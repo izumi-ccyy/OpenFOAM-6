@@ -36,8 +36,8 @@ Description
 #include "CMULES.H"
 #include "localEulerDdtScheme.H"
 #include "subCycle.H"
-#include "threePhaseMixtureEThermo.H"
-#include "temperaturePhaseChangeThreePhaseMixture.H"
+#include "./temperaturePhaseChangeThreePhaseMixtures/threePhaseMixtureEThermo/threePhaseMixtureEThermo.H"
+#include "./temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixtures/temperaturePhaseChangeThreePhaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
                         // Make the flux relative to the mesh motion
                         fvc::makeRelative(phi, U);
 
-                        mixture.correct();
+                        mixture->correct();
                     }
 
                     if (checkMeshCourantNo)
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
 
-            mixture.correct();
+            mixture->correct();
 
             #include "UEqn.H"
             #include "TEqn.H"

@@ -35,8 +35,7 @@ SourceFiles
 #ifndef temperaturePhaseChangeThreePhaseMixture_H
 #define temperaturePhaseChangeThreePhaseMixture_H
 
-//#include "../thermoIncompressibleThreePhaseMixture/thermoIncompressibleThreePhaseMixture.H"
-#include "thermoIncompressibleThreePhaseMixture.H"
+#include "../thermoIncompressibleThreePhaseMixture/thermoIncompressibleThreePhaseMixture.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "volFields.H"

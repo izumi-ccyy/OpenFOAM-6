@@ -89,7 +89,7 @@ surfaceScalarField rhoPhi
 // Construct incompressible turbulence model
 autoPtr<incompressible::turbulenceModel> turbulence
 (
-    incompressible::turbulenceModel::New(U, phi, mixture)
+    incompressible::turbulenceModel::New(U, phi, thermo())
 );
 
 

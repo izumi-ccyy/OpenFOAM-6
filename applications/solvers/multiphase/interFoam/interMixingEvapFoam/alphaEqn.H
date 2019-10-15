@@ -12,7 +12,7 @@
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mixture.cAlpha()*mag(phi/mesh.magSf())*mixture.nHatf()
+        thermo().cAlpha()*mag(phi/mesh.magSf())*thermo().nHatf()
     );
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
@@ -66,7 +66,7 @@
                 alpha1,
                 alpharScheme
             )
-          + vDotcAlphalA / rho1  // add mass loss
+          + fvc::interpolate(vDotcAlphalA/rho1)  // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha1
@@ -130,7 +130,7 @@
                 alpha2,
                 alpharScheme
             )
-          + vDotcAlphalA / rho2 // add mass loss
+          + fvc::interpolate(vDotcAlphalA/rho2) // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha2

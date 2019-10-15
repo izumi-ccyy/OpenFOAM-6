@@ -14,6 +14,7 @@
       - [he(p, T)](#hep-t)
       - [h(p, T, celli)](#hp-t-celli)
       - [h(p, T, patchi)](#hp-t-patchi)
+      - [hc()](#hc)
       - [Cp()](#cp)
       - [Cp(p, T, patchi)](#cpp-t-patchi)
       - [rho()](#rho)
@@ -37,6 +38,8 @@
   - [TEqn.H](#teqnh)
   - [interMixingEvapFoam.C](#intermixingevapfoamc-1)
   - [alphaEqn.H](#alphaeqnh)
+  - [constant](#constant)
+    - [constant.C](#constantc)
 - [Compile](#compile)
   - [Make](#make)
     - [files](#files)
@@ -453,6 +456,75 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::he
 }
 ```
 
+#### hc()
+
+In OpenFOAM-Plus it is:
+
+```cpp
+return tmp<volScalarField>::New
+(
+    IOobject
+    (
+        "K",
+        Ur.mesh().time().timeName(),
+        Ur.mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE,
+        false
+    ),
+    Ur.mesh(),
+    dimensionedScalar(dimDensity/dimTime, Zero)
+);
+```
+
+But in OpenFOAM-6 it should be the following as `applications\solvers\multiphase\multiphaseEulerFoam\interfacialModels\dragModels\interface\interface.C`
+
+```cpp
+return tmp<volScalarField>
+(
+    new volScalarField
+    (
+        IOobject
+        (
+            "K",
+            Ur.mesh().time().timeName(),
+            Ur.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        Ur.mesh(),
+        dimensionedScalar("K", dimDensity/dimTime, 0)
+    )
+);
+```
+
+So change `hc()` as:
+
+```cpp
+Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::hc() const // define hc
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hc",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("hc", Hf2() - Hf1())
+        )
+    );
+}
+```
+
 #### Cp()
 
 mass average:
@@ -540,8 +612,8 @@ Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::rho() const
             "rho",
             (
                 limitedAlpha1*rho1().value()
-                limitedAlpha2*rho2().value()
-              + (scalar(1) - limitedAlpha1 - limitedAlpha3)*rho3().value()
+              + limitedAlpha2*rho2().value()
+              + (scalar(1) - limitedAlpha1 - limitedAlpha2)*rho3().value()
             )
         )
     );
@@ -1081,7 +1153,7 @@ surfaceScalarField alphaPhi1 // add compression
         alpha1,
         alpharScheme
     )
-    + vDotcAlphalA / rho1  // add mass loss
+    + fvc::interpolate(vDotcAlphalA/rho1)  // add mass loss
 );
 ```
 
@@ -1100,8 +1172,24 @@ surfaceScalarField alphaPhi2 // interface only exsists between 1 and 2, 1 and 3
         alpha2,
         alpharScheme
     )
-    + vDotcAlphalA / rho2 // add mass loss
+    + fvc::interpolate(vDotcAlphalA/rho2) // add mass loss
 );
+```
+
+## constant
+
+### constant.C
+
+In `applications\solvers\compressible\rhoCentralFoam\rhoCentralDyMFoam\rhoCentralDyMFoam.C` we have:
+
+```cpp
+dimensionedScalar v_zero("v_zero", dimVolume/dimTime, 0.0);
+```
+
+So it is changed to:
+
+```cpp
+const dimensionedScalar T0("T0", dimTemperature, Zero);
 ```
 
 # Compile
