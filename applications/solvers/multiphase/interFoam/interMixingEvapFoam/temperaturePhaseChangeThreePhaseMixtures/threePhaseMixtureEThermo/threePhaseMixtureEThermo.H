@@ -41,7 +41,7 @@ SourceFiles
 #include "volFields.H"
 
 #include "basicThermo.H"
-#include "thermoIncompressibleThreePhaseMixture.H" // include Mixure
+#include "../thermoIncompressibleThreePhaseMixture/thermoIncompressibleThreePhaseMixture.H" // include Mixure
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -300,7 +300,7 @@ public:
             }
 
             //- Return transport properties dictionary
-            const incompressibleTwoPhaseMixture& transportPropertiesDict()
+            const immiscibleIncompressibleThreePhaseMixture& transportPropertiesDict()
             {
                 return *this;
             }

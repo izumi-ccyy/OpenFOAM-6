@@ -102,7 +102,7 @@ Foam::threePhaseMixtureEThermo::threePhaseMixtureEThermo
                 IOobject::NO_WRITE
             ),
             U.mesh(),
-            dimensionedScalar(dimEnergy/dimMass, Zero),
+            dimEnergy/dimMass, // accroding to heTHermo.C
             heBoundaryTypes()
         )
     ),
@@ -121,7 +121,7 @@ Foam::threePhaseMixtureEThermo::threePhaseMixtureEThermo
 
 void Foam::threePhaseMixtureEThermo::correct() // correct T by alpha1 and alpha2
 {
-    incompressibleTwoPhaseMixture::correct();
+    immiscibleIncompressibleThreePhaseMixture::correct();
 
     // add phase 3
     const volScalarField alpha1Rho1(alpha1()*rho1());
@@ -269,7 +269,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::THE
 ) const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<scalarField>(nullptr);
 }
 
 
@@ -282,7 +282,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::THE
 ) const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<scalarField>(nullptr);
 }
 
 
@@ -480,14 +480,14 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::Cpv
 Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::CpByCpv() const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<volScalarField>(nullptr);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::W() const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<volScalarField>(nullptr);
 }
 
 
@@ -499,7 +499,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::CpByCpv
 ) const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<scalarField>(nullptr);
 }
 
 
@@ -558,7 +558,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::kappa
 Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::alphahe() const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<volScalarField>(nullptr);
 }
 
 
@@ -568,7 +568,7 @@ Foam::tmp<Foam::scalarField> Foam::threePhaseMixtureEThermo::alphahe
 ) const
 {
     NotImplemented;
-    return nullptr;
+    return tmp<scalarField>(nullptr);
 }
 
 Foam::tmp<Foam::volScalarField> Foam::threePhaseMixtureEThermo::kappaEff
@@ -668,7 +668,7 @@ bool Foam::threePhaseMixtureEThermo::read()
     if (basicThermo::read() && thermoIncompressibleThreePhaseMixture::read())
     {
         basicThermo::readIfPresent("pDivU", pDivU_);
-        basicThermo::readEntry("TSat", TSat_);
+        basicThermo::lookup("TSat") >> TSat_;
         return true;
     }
 

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoIncompressibleThreePhaseMixture.H"
+#include "./thermoIncompressibleThreePhaseMixture.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
