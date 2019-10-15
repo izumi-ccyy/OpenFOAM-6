@@ -45,6 +45,8 @@
         const volScalarField& vDotvAlphalA = vDotAlphalA[1]();
         const volScalarField vDotvmcAlphalA(vDotvAlphalA - vDotcAlphalA);
 
+        Info<< "alpha Equation 1" << nl << endl;
+
         // Create the complete convection flux for alpha1
         surfaceScalarField alphaPhi1 // add compression
         (
@@ -66,7 +68,7 @@
                 alpha1,
                 alpharScheme
             )
-          + fvc::interpolate(vDotcAlphalA/rho1)  // add mass loss
+          //+ fvc::interpolate(vDotcAlphalA/rho1)  // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha1
@@ -115,6 +117,8 @@
             );
         }
 
+        Info<< "alpha Equation 2" << nl << endl;
+
         // Create the complete flux for alpha2
         surfaceScalarField alphaPhi2 // interface only exsists between 1 and 2, 1 and 3
         (
@@ -130,7 +134,7 @@
                 alpha2,
                 alpharScheme
             )
-          + fvc::interpolate(vDotcAlphalA/rho2) // add mass loss
+          //+ fvc::interpolate(vDotcAlphalA/rho2) // add mass loss
         );
 
         // Create the bounded (upwind) flux for alpha2
