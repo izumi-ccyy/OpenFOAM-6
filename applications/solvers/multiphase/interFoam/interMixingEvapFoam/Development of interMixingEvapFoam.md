@@ -1123,6 +1123,8 @@ volScalarField& T = thermo->T();
 
 ## alphaEqn.H
 
+**Here is a question that the dimension of alphaPhi1 is not equal between fvc::flux and fvc::interpolate(vDotcAlphaA/rho1)**
+
 ```cpp
 // add mass flow rate
 Pair<tmp<volScalarField>> vDotAlphalA = mixture->mDot();
